@@ -1,14 +1,27 @@
+# This script demonstrates how to make an authenticated API call with rate limit handling.
+# It shows how to:
+#  - Use a wrapper function to automatically retry on 429 Too Many Requests
+#  - Calculate wait time based on the replenish rate before retrying
+#  - Enforce a maximum retry limit using a circuit breaker
+#  - Log and interpret rate limiting headers
+
 import requests
 import time
 import logging
 import os
 from authenticate import get_token
 
+# Configures logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format= "%(asctime)s [%(levelname)s] %(message)s"
+)
+
 # Get the API endpoint from the environment
-API_URL = os.environ.get('EYES_URL')
+EYES_URL = "https://api-v2-integration.dev.7signal.com/eyes"
 
 # If the API URL isn’t set, crash early with a clear error
-if not API_URL:
+if not EYES_URL:
     raise ValueError("API_URL environment variable not set")
 
 # Get a valid bearer token from the authenticate file
@@ -19,16 +32,14 @@ HEADERS = {
     "Authorization": f"Bearer {token}"
 }
 
-# Configures logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format= "%(asctime)s [%(levelname)s] %(message)s"
-)
+max_retries=5
 
 # Rate-Limited API Call
-def rate_limiting_call():
-    while True:
-        response = requests.get(API_URL, headers=HEADERS)
+def handle_rate_limits(api_func):
+    attempt = 0
+
+    while attempt < max_retries:
+        response = api_func()
 
         # Extract rate limit data from the response headers
         remaining = response.headers.get("x-ratelimit-remaining")
@@ -72,7 +83,12 @@ def rate_limiting_call():
 
 # Main Execution
 def main():
-    result = rate_limiting_call()
+
+    def get_eyes_summary():
+        return requests.get(EYES_URL, headers=HEADERS)
+
+    result = handle_rate_limits(get_eyes_summary)
+
     if result:
         logging.info(f"Response Data: {result}")
     else:
