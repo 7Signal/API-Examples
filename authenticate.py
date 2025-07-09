@@ -56,7 +56,24 @@ def get_token():
 
     # If theres no valid token, it'll print to get a new one
     logging.info("Requesting new token...")
-	@@ -77,30 +77,32 @@ def get_token():
+
+    # The request payload contains the data for the POST request to get the token
+    payload = {
+        "grant_type": "client_credentials",
+        "client_id": client_id,
+        "client_secret": client_secret
+    }
+
+    # Which format we're sending the data in
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    # Sends a POST request with the payload and headers to the token endpoint
+    response = requests.post(token_url, data=payload, headers=headers)
+
+    # if the request succeeded, it extracts the token and how long its valid
+    if response.status_code == 200:
         data = response.json()
         access_token = data["access_token"]
         expires_in = data["expires_in"]
@@ -69,7 +86,7 @@ def get_token():
         # prints the confirmation and return the token
         logging.info("Token received and stored in memory")
         return access_token, expires_at
-
+    
     # if request failed, it'll print an error 
     else:
         logging.error("Failed to retrieve token")
