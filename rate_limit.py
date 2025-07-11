@@ -24,14 +24,6 @@ EYES_URL = "https://api-v2-integration.dev.7signal.com/eyes"
 if not EYES_URL:
     raise ValueError("API_URL environment variable not set")
 
-# Get a valid bearer token from the authenticate file
-token = get_token()
-
-# Include the token in the request headers
-HEADERS = {
-    "Authorization": f"Bearer {token}"
-}
-
 max_retries=5
 
 # Rate-Limited API Call
@@ -83,6 +75,14 @@ def handle_rate_limits(api_func):
 
 # Main Execution
 def main():
+
+    # Get a valid bearer token and its expiry time from the authenticate file
+    token, expires_at = get_token()
+
+    # Include the token in the request headers
+    HEADERS = {
+        "Authorization": f"Bearer {token}"
+    }
 
     def get_eyes_summary():
         return requests.get(EYES_URL, headers=HEADERS)

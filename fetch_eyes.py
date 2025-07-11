@@ -105,7 +105,7 @@ def log_summary(data):
 def main():
     # Main program logic. Fetches a bearer token and uses it to retrieve
     # summary information from the /eyes API.
-    token = get_token()
+    token, expires_at = get_token()
 
     # You can pass organizationId, organization, and eyesType here
     if token:
