@@ -1,3 +1,4 @@
+
 # This script demonstrates how to make an authenticated API call with rate limit handling.
 # It shows how to:
 #  - Use a wrapper function to automatically retry on 429 Too Many Requests
@@ -9,7 +10,10 @@ import requests
 import time
 import logging
 import os
-from authenticate import get_token
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from auth_utils import get_token
 
 # Configures logging
 logging.basicConfig(

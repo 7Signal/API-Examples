@@ -9,7 +9,10 @@
 import os
 import logging
 import requests
-from authenticate import get_token # Allows us to fetch a JWT token using API key and secret
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from auth_utils import get_token 
 
 # Configure the logging for the script
 logging.basicConfig(
@@ -105,7 +108,7 @@ def log_summary(data):
 def main():
     # Main program logic. Fetches a bearer token and uses it to retrieve
     # summary information from the /eyes API.
-    token = get_token()
+    token, _ = get_token()
 
     # You can pass organizationId, organization, and eyesType here
     if token:
