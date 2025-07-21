@@ -9,7 +9,10 @@
 import os
 import logging
 import requests
-from authenticate import get_token # Allows us to fetch a JWT token using API key and secret
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from auth_utils import get_token 
 
 # Configure the logging for the script
 logging.basicConfig(
