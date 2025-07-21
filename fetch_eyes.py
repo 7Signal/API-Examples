@@ -24,7 +24,7 @@ if not eyes_url:
     raise EnvironmentError("eyes_url must be set in environment variables")
 
 
-def fetch_eyes_summary(token, organizationId=None, organization=None, eyesType=None):
+def fetch_eyes_summary(token, organization_id=None, organization=None, eyes_type=None):
     # Uses a valid token to query the /eyes endpoint with optional filters.
     # This function abstracts away the request logic and logs either a summary
     # of the returned data or details of an error response.
@@ -35,12 +35,12 @@ def fetch_eyes_summary(token, organizationId=None, organization=None, eyesType=N
 
     # Builds the parameters dynamically
     parameters = {}
-    if organizationId:
-        parameters["organizationId"] = organizationId
+    if organization_id:
+        parameters["organizationId"] = organization_id
     if organization:
         parameters["organization"] = organization
-    if eyesType:
-        parameters["eyesType"] = eyesType
+    if eyes_type:
+        parameters["eyesType"] = eyes_type
 
     logging.info(f"Calling GET /eyes with parameters: {parameters}")
 
@@ -109,7 +109,7 @@ def main():
 
     # You can pass organizationId, organization, and eyesType here
     if token:
-        fetch_eyes_summary(token, organizationId = None, organization = None, eyesType = None)
+        fetch_eyes_summary(token, organization_id = None, organization = None, eyes_type = None)
 
 if __name__ == "__main__":
     main()
