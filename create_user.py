@@ -13,7 +13,7 @@ from authenticate import get_token
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s'
-)
+) 
 
 # Fetch users endpoint URL from environment variable
 users_url = os.environ.get("USERS_URL")
@@ -21,7 +21,7 @@ if not users_url:
     raise EnvironmentError("USERS_URL must be set in environment variables")
 
 
-def fetch_users(token, organization_id=None):
+def fetch_users(token):
     # This function fetches the users from the /users endpoint using the token
 
     headers = {
@@ -78,7 +78,7 @@ def log_users_summary(data):
 def main():
 
     # fetches the token from the authenticate.py file
-    token, expires_at = get_token()
+    token, _ = get_token()
     # calls the API using that token
     fetch_users(token)
 
