@@ -18,10 +18,10 @@ logging.basicConfig(
     format='%(asctime)s [%(levelname)s] %(message)s'
 ) 
 
-# Fetch users endpoint URL from environment variable
-users_url = os.environ.get("USERS_URL")
+# Fetch users endpoint URL
+users_url = "https://api-v2-integration.dev.7signal.com/users"
 if not users_url:
-    raise EnvironmentError("USERS_URL must be set in environment variables")
+    raise ValueError("USERS_URL variable not set")
 
 
 def fetch_users(token):
@@ -36,10 +36,9 @@ def fetch_users(token):
     # logs the request details
     logging.info(f"GET /users with params: {params}")
 
-    # send the GET request to the users endpoints
-    response = requests.get(users_url, headers=headers, params=params)
-
     try:
+        # send the GET request to the users endpoints
+        response = requests.get(users_url, headers=headers, params=params)
         response.raise_for_status()
 
         # parses the JSON response
@@ -55,8 +54,6 @@ def fetch_users(token):
         logging.error(f"Response content: {response.text}")
     except Exception as e:
         logging.error(f"Unexpected error occurred: {e}")
-
-    data = response.json()
 
 
 def log_users_summary(data):
@@ -80,10 +77,11 @@ def log_users_summary(data):
 
 def main():
 
-    # fetches the token from the authenticate.py file
+    # fetches the token from the auth_utils.py file
     token, _ = get_token()
     # calls the API using that token
     fetch_users(token)
 
 if __name__ == "__main__":
     main()
+

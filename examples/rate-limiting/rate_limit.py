@@ -21,15 +21,15 @@ logging.basicConfig(
     format= "%(asctime)s [%(levelname)s] %(message)s"
 )
 
-# Get the API endpoint from the environment
+# Get the API endpoint
 EYES_URL = "https://api-v2-integration.dev.7signal.com/eyes"
 
 # If the API URL isn’t set, crash early with a clear error
 if not EYES_URL:
-    raise ValueError("API_URL environment variable not set")
+    raise ValueError("API_URL variable not set")
 
 # Get a valid bearer token from the authenticate file
-token = get_token()
+token, _ = get_token()
 
 # Include the token in the request headers
 HEADERS = {
