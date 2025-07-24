@@ -1,3 +1,10 @@
+# This script demonstrates how to make an authenticated API call to fetch a list of API keys.
+# It shows how to:
+#  - Make a GET request to the /apikeys endpoint using a bearer token
+#  - Log request and response status using Python's logging module
+#  - Parse and log pagination metadata and key details for each API key in the response
+#  - Handle missing or unexpected fields
+
 import requests
 import logging
 import os
@@ -29,6 +36,7 @@ def get_apikeys(token):
 
     response = requests.get(APIKEYS_URL, headers=headers)
 
+    # If the request is successful, it will log and display the formatted summary
     if response.ok:
         logging.info("Request successful.")
         return response.json()
@@ -65,6 +73,8 @@ def log_response_data(response_data):
 
 # Main logic
 def main():
+    # Main program logic. Fetches a bearer token and uses it to retrieve
+    # summary information from /apikeys.
     token, _ = get_token()
     result = get_apikeys(token)
 
