@@ -20,11 +20,16 @@ logging.basicConfig(
     format = "%(asctime)s [%(levelname)s] %(message)s"
 )
 
-# Reads the API URL for the /eyes endpoint from the environment variables
-# This allows the script to be flexible with it's target.
-eyes_url = os.environ.get("EYES_URL")
+# Define API host from environment
+API_HOST = os.getenv("API_HOST")
+if not API_HOST:
+    raise ValueError("API_HOST environment variable not set")
+
+# Construct the full API URL
+# Reads the API URL for the /eyes endpoint.
+eyes_url = f"https://{API_HOST}/eyes"
 if not eyes_url:
-    raise EnvironmentError("eyes_url must be set in environment variables")
+    raise ValueError("eyes_url variable not set")
 
 
 def fetch_eyes_summary(token, organizationId=None, organization=None, eyesType=None):

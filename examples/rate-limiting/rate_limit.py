@@ -21,15 +21,22 @@ logging.basicConfig(
     format= "%(asctime)s [%(levelname)s] %(message)s"
 )
 
-# Get the API endpoint from the environment
-EYES_URL = "https://api-v2-integration.dev.7signal.com/eyes"
+# Define API host from environment
+API_HOST = os.getenv("API_HOST")
+if not API_HOST:
+    raise ValueError("API_HOST environment variable not set")
+
+# Construct the full API URL
+
+# Get the API endpoint
+EYES_URL = f"https://{API_HOST}/eyes"
 
 # If the API URL isn’t set, crash early with a clear error
 if not EYES_URL:
-    raise ValueError("API_URL environment variable not set")
+    raise ValueError("API_URL variable not set")
 
 # Get a valid bearer token from the authenticate file
-token = get_token()
+token, _ = get_token()
 
 # Include the token in the request headers
 HEADERS = {
@@ -100,3 +107,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    
