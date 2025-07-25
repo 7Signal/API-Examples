@@ -20,10 +20,13 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
-# Get the full endpoint from APIKEYS
-APIKEYS_URL = "https://api-v2-integration.dev.7signal.com/apikeys"
-if not APIKEYS_URL:
-    raise ValueError("APIKEYS_URL variable not set")
+# Define API host from environment
+API_HOST = os.getenv("API_HOST")
+if not API_HOST:
+    raise ValueError("API_HOST environment variable not set")
+
+# Construct the full API URL
+APIKEYS_URL = f"https://{API_HOST}/apikeys"
 
 # Makes a GET request to /apikeys using the provided token
 def get_apikeys(token):

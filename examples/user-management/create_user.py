@@ -18,8 +18,15 @@ logging.basicConfig(
     format='%(asctime)s [%(levelname)s] %(message)s'
 ) 
 
+# Define API host from environment
+API_HOST = os.getenv("API_HOST")
+if not API_HOST:
+    raise ValueError("API_HOST environment variable not set")
+
+# Construct the full API URL
+
 # Fetch users endpoint URL
-users_url = "https://api-v2-integration.dev.7signal.com/users"
+users_url = f"https://{API_HOST}/users"
 if not users_url:
     raise ValueError("USERS_URL variable not set")
 
