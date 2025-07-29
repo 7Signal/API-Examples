@@ -29,9 +29,16 @@ client_secret = os.environ.get("API_SECRET")
 if not client_id or not client_secret:
     raise EnvironmentError("API_KEY and API_SECRET must be set in environment variables.")
 
+# Define API host from environment
+API_HOST = os.getenv("API_HOST")
+if not API_HOST:
+    raise ValueError("API_HOST environment variable not set")
+
+# Construct the full API URL
+
 # Get token endpoint from the environment variable
 # This is the endpoint used to request a 0Auth2 access token
-token_url = os.environ.get("TOKEN_URL")
+token_url = f"https://{API_HOST}/oauth2/token"
 
 # Raises an error if the token_url is not set, so the user knows they must provide it
 if not token_url:
