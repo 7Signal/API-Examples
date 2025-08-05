@@ -2,7 +2,6 @@ import os
 import requests
 import sys
 import logging
-import warnings
 
 # Make sure we can import get_token
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
