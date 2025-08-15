@@ -1,3 +1,8 @@
+# This script demonstrates how to make an authenticated API call to fetch a single agent by ID.
+# It shows how to:
+#  - Retrieve agent details from the /eyes/agents/{agentId} endpoint
+#  - Log all key-value pairs of the agent information
+
 import os
 import requests
 import sys

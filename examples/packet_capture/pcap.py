@@ -1,3 +1,9 @@
+# This script demonstrates how to perform an on-demand packet capture on a sensor.
+# It shows how to:
+#  - Start a packet capture on the /on-demand-tests/sensors/{sensorId}/packet-capture endpoint
+#  - Poll the capture status until it completes or fails
+#  - Download the resulting pcap file locally
+
 import os
 import time
 import logging
