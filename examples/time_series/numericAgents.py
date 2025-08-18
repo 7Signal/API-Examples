@@ -29,16 +29,16 @@ if not API_HOST:
     raise EnvironmentError("The API_HOST variable seems to be missing, please check if it is set.")
 
 if not FROM:
-    raise EnvironmentError("The FROM environment variable may not be set.")
+    raise EnvironmentError("The FROM environment variable may not be set. Ex: 1755537748000 (must be in milliseconds).")
 
 if not TO:
-    raise EnvironmentError("The TO environment variable may not be set.")
+    raise EnvironmentError("The TO environment variable may not be set. Ex: 1755537748000 (must be in milliseconds).")
 
 # Hardcoded values
-METRICS = "EXPERIENCE_SCORE"
-groupByDimension = "make"
+METRICS = ["EXPERIENCE_SCORE"]
+groupByDimension = "locationId"
 TIME_BUCKET = "2_HOUR"
-AGGREGATE_FUNCTION = "AVG"
+AGGREGATE_FUNCTION = ["AVG"]
 
 # Construct numeric endpoint URL
 url = f"https://{API_HOST}/time-series/agents/numeric/{groupByDimension}"
@@ -98,10 +98,10 @@ def log_numeric_summary(data):
     logging.info(f"Total Result Groups: {len(results)}")
 
     for result in results:
-        make = result.get("make", "N/A")
+        location_id = result.get("locationId", "N/A")
         metric_aggregates = result.get("metricAggregates", [])
 
-        logging.info(f"Make: {make}")
+        logging.info(f"LocationId: {location_id}")
         for agg in metric_aggregates:
             # Extract main metric info
             metric = agg.get("metric", "N/A")
@@ -120,6 +120,7 @@ def log_numeric_summary(data):
                     logging.info(f"    - Timestamp: {ts} | Avg: {ts_avg}")
             else:
                 logging.info("  No time series data available.")
+
 
 
 def main():
