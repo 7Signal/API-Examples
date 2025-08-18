@@ -1,3 +1,8 @@
+# This script demonstrates how to fetch and log topology agent location data from the API.
+# It shows how to:
+#  - Retrieve agents' location details from the /topologies/agents/locations endpoint
+#  - Log each location's ID, name, address, creation date, and last update date
+
 import os
 import logging
 import requests

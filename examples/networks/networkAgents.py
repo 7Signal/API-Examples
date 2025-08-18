@@ -1,3 +1,8 @@
+# This script demonstrates how to make an authenticated API call to fetch network agents.
+# It shows how to:
+#  - Retrieve network agents from the /networks/agents endpoint
+#  - Log each agent's ID, name, enabled status, creation date, and last update date
+
 import os
 import logging
 import requests

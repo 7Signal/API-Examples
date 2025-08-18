@@ -1,3 +1,8 @@
+# This script demonstrates how to make an authenticated API call to fetch access points.
+# It shows how to:
+#  - Retrieve access points from the /access-points/agents endpoint
+#  - Log details such as ID, name, controller, MAC address, and location ID
+
 import os
 import logging
 import requests
