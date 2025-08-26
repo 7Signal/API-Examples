@@ -32,7 +32,7 @@ export API_SECRET=“your-client-secret”
 export API_HOST="api-v2-integration.dev.7signal.com"
 ```
 
-Depending on the script you want to run, you may need to set a couple of additional environment variables.
+Depending on the script you want to run, you need to set a couple of additional environment variables:
 
 Eyes Endpoint
 
@@ -81,7 +81,7 @@ $env:API_SECRET="your_api_secret_here"
 $env:API_HOST="api-v2-integration.dev.7signal.com"
 ```
 
-Depending on the script you want to run, you may need to set a couple of additional environment variables.
+Depending on the script you want to run, you need to set a couple of additional environment variables:
 
 
 Eyes Endpoint
