@@ -35,16 +35,22 @@ export API_HOST="api-v2-integration.dev.7signal.com"
 Depending on the script you want to run, you may need to set a couple of additional environment variables.
 
 Eyes Endpoint
-    
-    `export AGENT_ID="your-agent-id"`
+
+    ```
+    export AGENT_ID="your-agent-id"
+    ```
 
 KPI Endpoint
     
-    `export KPI_CODE="your-kpi-code"`
+    ```
+    export KPI_CODE="your-kpi-code"
+    ```
 
 Packet Capture Endpoint
     
-    `export SENSOR_ID="your-sensor-id"`
+    ```
+    export SENSOR_ID="your-sensor-id"
+    ```
 
 Time Series Endpoint
     
@@ -84,15 +90,21 @@ Depending on the script you want to run, you may need to set a couple of additio
 
 Eyes Endpoint
     
-    `$env:AGENT_ID="your-agent-id"`
+    ```
+    $env:AGENT_ID="your-agent-id"
+    ```
 
 KPI Endpoint
     
-    `$env:KPI_CODE="your-kpi-code"`
+    ```
+    $env:KPI_CODE="your-kpi-code"
+    ```
 
 Packet Capture Endpoint
     
-    `$env:SENSOR_ID="your-sensor-id"`
+    ```
+    $env:SENSOR_ID="your-sensor-id"
+    ```
 
 Time Series Endpoint
 
