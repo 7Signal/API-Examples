@@ -22,10 +22,14 @@ Example Code for 7SIGNAL's API
     `pip install requests`
 
 ## Configure Settings
-These files require 3 main environment variables
-1. `export API_KEY=“your-client-id”`
-2. `export API_SECRET=“your-client-secret”`
-3. `export API_HOST="api-v2-integration.dev.7signal.com"`
+These files require 3 main environment variables:
+```
+export API_KEY=“your-client-id”
+export API_SECRET=“your-client-secret”
+export API_HOST="api-v2-integration.dev.7signal.com"
+```
+
+Depending on the script you want to run, you may need to set a couple of additional environment variables.
 
 Eyes Endpoint
     `export AGENT_ID="your-agent-id"`
@@ -42,20 +46,28 @@ Time Series Endpoint
 
 ## Run the Python Script
 ex: API Keys
-    `cd examples/api_keys`
-    `python3 get_apikeys.py`
+    ```
+    cd examples/api_keys
+    python3 get_apikeys.py
+    ```
 
 ex: Topologies
-    `cd topologies`
-    `python3 topologyAgents.py`
+    ```
+    cd topologies
+    python3 topologyAgents.py
+    ```
 
 # Windows
 If you are using Powershell:
 ## Configure Settings
-These files require 3 main environment variables
-1. `$env:API_KEY="your_api_key_here"`
-2. `$env:API_SECRET="your_api_secret_here"`
-3. `$env:API_HOST="api-v2-integration.dev.7signal.com"`
+These files require 3 main environment variables:
+```
+$env:API_KEY="your_api_key_here"
+$env:API_SECRET="your_api_secret_here"
+$env:API_HOST="api-v2-integration.dev.7signal.com"
+```
+
+Depending on the script you want to run, you may need to set a couple of additional environment variables.
 
 Eyes Endpoint
     `$env:AGENT_ID="your-agent-id"`
@@ -67,5 +79,7 @@ Packet Capture Endpoint
     `$env:SENSOR_ID="your-sensor-id"`
 
 Time Series Endpoint
-    `$env:TO="your-current-epoch-time-in-milliseconds"`
-    `$env:FROM="your-epoch-time-you’re-measuring-from-in-milliseconds"`
+    ```
+    $env:TO="your-current-epoch-time-in-milliseconds"
+    $env:FROM="your-epoch-time-you’re-measuring-from-in-milliseconds"
+    ```
