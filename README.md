@@ -1,7 +1,7 @@
 # API-Examples
 Example Code for 7SIGNAL's API
 
-## Getting an API KEY
+### Getting an API KEY
 1. https://start-dev.7signal.com/
 2. Click Users
 3. Click API Keys tab 
@@ -10,20 +10,20 @@ Example Code for 7SIGNAL's API
 6. Add a description if needed
 7. Submit
 
-# MAC
-## Set up Python
+## MAC
+### Set up Python
 1. https://www.python.org/downloads/
 2. Download python 
 3. Verify version
    
     `python --version`
 
-## Install Dependencies
+### Install Dependencies
 1. Install the Requests library
     
     `pip install requests`
 
-## Configure Settings
+### Configure Settings
 These files require 3 main environment variables:
 
 ```
@@ -55,7 +55,7 @@ Time Series Endpoint
     export FROM="your-epoch-time-you’re-measuring-from-in-milliseconds"
 
 
-## Run the Python Script
+### Run the Python Script
 ex: API Keys
     
 
@@ -70,9 +70,9 @@ ex: Topologies
     python3 topologyAgents.py
 
 
-# Windows
+## Windows
 If you are using Powershell:
-## Configure Settings
+### Configure Settings
 These files require 3 main environment variables:
 
 ```
