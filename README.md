@@ -36,43 +36,39 @@ Depending on the script you want to run, you may need to set a couple of additio
 
 Eyes Endpoint
 
-    ```
     export AGENT_ID="your-agent-id"
-    ```
+    
 
 KPI Endpoint
     
-    ```
     export KPI_CODE="your-kpi-code"
-    ```
+
 
 Packet Capture Endpoint
     
-    ```
     export SENSOR_ID="your-sensor-id"
-    ```
+
 
 Time Series Endpoint
     
-    ```
     export TO="your-current-epoch-time-in-milliseconds"
     export FROM="your-epoch-time-you’re-measuring-from-in-milliseconds"
-    ```
+
 
 ## Run the Python Script
 ex: API Keys
     
-    ```
+
     cd examples/api_keys
     python3 get_apikeys.py
-    ```
+
 
 ex: Topologies
     
-    ```
+
     cd topologies
     python3 topologyAgents.py
-    ```
+
 
 # Windows
 If you are using Powershell:
@@ -90,26 +86,26 @@ Depending on the script you want to run, you may need to set a couple of additio
 
 Eyes Endpoint
     
-    ```
+
     $env:AGENT_ID="your-agent-id"
-    ```
+
 
 KPI Endpoint
     
-    ```
+
     $env:KPI_CODE="your-kpi-code"
-    ```
+
 
 Packet Capture Endpoint
     
-    ```
+
     $env:SENSOR_ID="your-sensor-id"
-    ```
+
 
 Time Series Endpoint
 
-    ```
+
     $env:TO="your-current-epoch-time-in-milliseconds"
     $env:FROM="your-epoch-time-you’re-measuring-from-in-milliseconds"
-    ```
+
 
