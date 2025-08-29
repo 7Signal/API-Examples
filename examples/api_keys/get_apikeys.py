@@ -19,7 +19,7 @@ logging.basicConfig(
 )
 
 # Define API host from environment
-API_HOST = os.getenv("API_HOST", "api-v2-integration.dev.7signal.com")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 # Construct the full API URL
 APIKEYS_URL = f"https://{API_HOST}/apikeys"

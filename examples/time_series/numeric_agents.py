@@ -22,7 +22,7 @@ logging.basicConfig(
 # Load environment variables
 FROM = os.getenv("FROM")
 TO = os.getenv("TO")
-API_HOST = os.getenv("API_HOST", "api-v2-integration.dev.7signal.com")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 # Error response if environment variables are missing
 if not FROM:

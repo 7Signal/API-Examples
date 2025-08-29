@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 
 # Environment variables
-API_HOST = os.getenv("API_HOST", "api-v2-integration.dev.7signal.com")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 SENSOR_ID = os.getenv("SENSOR_ID")
 
 # Error response if environment variable is missing

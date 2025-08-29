@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 
 # Define API host from environment
-API_HOST = os.getenv("API_HOST", "api-v2-integration.dev.7signal.com")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 def fetch_organizations(token):
     # Fetch organization data from the API.

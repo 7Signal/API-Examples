@@ -19,7 +19,7 @@ logging.basicConfig(
 )
 
 # Define API Host and KPI Code from environment
-API_HOST = os.getenv("API_HOST", "api-v2-integration.dev.7signal.com")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 KPI_CODE = os.getenv("KPI_CODE")
 
 # Check that required environment variable is set

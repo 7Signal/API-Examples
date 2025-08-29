@@ -20,7 +20,7 @@ logging.basicConfig(
 
 # # Define API Host and Agent ID from environment
 API_HOST = os.getenv("API_HOST")
-AGENT_ID = os.getenv("AGENT_ID", "api-v2-integration.dev.7signal.com")
+AGENT_ID = os.getenv("AGENT_ID", "api-v2.7signal.com")
 
 # Check that the required environment variable is set, otherwise raise errors
 if not AGENT_ID:
