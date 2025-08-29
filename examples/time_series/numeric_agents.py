@@ -22,12 +22,9 @@ logging.basicConfig(
 # Load environment variables
 FROM = os.getenv("FROM")
 TO = os.getenv("TO")
-API_HOST = os.getenv("API_HOST")
+API_HOST = os.getenv("API_HOST", "api-v2-integration.dev.7signal.com")
 
 # Error response if environment variables are missing
-if not API_HOST:
-    raise EnvironmentError("The API_HOST variable seems to be missing, please check if it is set.")
-
 if not FROM:
     raise EnvironmentError("The FROM environment variable may not be set. Ex: 1755537748000 (must be in milliseconds).")
 

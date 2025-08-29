@@ -1,5 +1,9 @@
 import pytest
+import sys
+import os
 from unittest.mock import patch, MagicMock
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 # Import the module to be tested
 from examples.authentication import fetch_eyes

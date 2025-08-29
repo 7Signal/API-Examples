@@ -1,5 +1,11 @@
 import pytest
+import sys
+import os
 from unittest.mock import patch, MagicMock
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+# Import the module to be tested
 from examples.api_keys import get_apikeys
 
 # Test that the 'get_apikeys' function exists in the get_apikeys module

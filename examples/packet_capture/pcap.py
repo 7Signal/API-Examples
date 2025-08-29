@@ -20,13 +20,10 @@ logging.basicConfig(
 )
 
 # Environment variables
-API_HOST = os.getenv("API_HOST")
+API_HOST = os.getenv("API_HOST", "api-v2-integration.dev.7signal.com")
 SENSOR_ID = os.getenv("SENSOR_ID")
 
-# Error response if environment variables are missing
-if not API_HOST:
-    raise EnvironmentError("The API_HOST variable seems to be missing, please check if it is set.")
-
+# Error response if environment variable is missing
 if not SENSOR_ID:
     raise EnvironmentError("The SENSOR_ID variable seems to be missing, please check if it is set.")
 

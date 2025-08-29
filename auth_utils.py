@@ -30,9 +30,7 @@ if not client_id or not client_secret:
     raise EnvironmentError("API_KEY and API_SECRET must be set in environment variables.")
 
 # Define API host from environment
-API_HOST = os.getenv("API_HOST")
-if not API_HOST:
-    raise ValueError("API_HOST environment variable not set")
+API_HOST = os.getenv("API_HOST", "api-v2-integration.dev.7signal.com")
 
 # Construct the full API URL
 
