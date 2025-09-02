@@ -20,17 +20,12 @@ logging.basicConfig(
 
 # Define API Host and KPI Code from environment
 API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
-KPI_CODE = os.getenv("KPI_CODE")
-
-# Check that required environment variable is set
-if not KPI_CODE:
-    raise EnvironmentError("KPI_CODE environment variable not set")
 
 # Construct the API URL for fetching sensor KPI data by organization
 kpi_url = f"https://{API_HOST}/kpis/sensors/organizations"
 
 
-def fetch_sensor_kpis_by_org(token):
+def fetch_sensor_kpis_by_org(token, KPI_CODE):
     # This function fetches KPI data for sensors by organization using the token
     headers = { 
         "Authorization": f"Bearer {token}"
@@ -94,10 +89,16 @@ def log_kpi_summary(data):
 
 
 def main():
+    # Ask user for KPI_CODE at runtime
+    KPI_CODE = input("Enter the KPI code: ").strip()
+    if not KPI_CODE:
+        logging.error("KPI code cannot be empty.")
+        sys.exit(1)
+
     # Fetches the token from the auth_utils.py file
     token, _ = get_token()
     # Calls the API using that token
-    fetch_sensor_kpis_by_org(token)
+    fetch_sensor_kpis_by_org(token, KPI_CODE)
 
 
 if __name__ == "__main__":

@@ -19,17 +19,13 @@ logging.basicConfig(
 )
 
 # # Define API Host and Agent ID from environment
-API_HOST = os.getenv("API_HOST")
-AGENT_ID = os.getenv("AGENT_ID", "api-v2.7signal.com")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
-# Check that the required environment variable is set, otherwise raise errors
-if not AGENT_ID:
-    raise EnvironmentError("AGENT_ID environment variable not set")
+def fetch_agent_by_id(token, AGENT_ID):
 
-# Construct the full API URL for fetching the agent by its ID
-agent_url = f"https://{API_HOST}/eyes/agents/{AGENT_ID}"
+    # Construct the full API URL for fetching the agent by its ID
+    agent_url = f"https://{API_HOST}/eyes/agents/{AGENT_ID}"
 
-def fetch_agent_by_id(token):
     # This function fetches the agent info from the /eyes/agents/{agentId} endpoint using the token
     headers = {
         "Authorization": f"Bearer {token}"
@@ -59,10 +55,16 @@ def log_agent_summary(data):
         logging.info(f"{key}: {value}")
 
 def main():
+    # Ask the user for Agent ID at runtime
+    AGENT_ID = input("Enter the Agent ID: ").strip()
+    if not AGENT_ID:
+        logging.error("AGENT_ID cannot be empty.")
+        sys.exit(1)
+
     # fetches the token from the auth_utils.py file
     token, _ = get_token()
     # calls the API using that token
-    fetch_agent_by_id(token)
+    fetch_agent_by_id(token, AGENT_ID)
 
 if __name__ == "__main__":
     main()

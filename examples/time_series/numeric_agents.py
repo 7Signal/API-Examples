@@ -20,16 +20,7 @@ logging.basicConfig(
 )
 
 # Load environment variables
-FROM = os.getenv("FROM")
-TO = os.getenv("TO")
 API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
-
-# Error response if environment variables are missing
-if not FROM:
-    raise EnvironmentError("The FROM environment variable may not be set. Ex: 1755537748000 (must be in milliseconds).")
-
-if not TO:
-    raise EnvironmentError("The TO environment variable may not be set. Ex: 1755537748000 (must be in milliseconds).")
 
 # Hardcoded values
 METRICS = ["EXPERIENCE_SCORE"]
@@ -41,7 +32,7 @@ AGGREGATE_FUNCTION = ["AVG"]
 url = f"https://{API_HOST}/time-series/agents/numeric/{groupByDimension}"
 
 
-def fetch_numeric_metrics(token):
+def fetch_numeric_metrics(token, FROM, TO):
     # Fetches aggregated metric data from the numeric endpoint
 
     # HTTP headers with authorization
@@ -121,9 +112,17 @@ def log_numeric_summary(data):
 
 
 def main():
-    # # Main function to get authentication token, and call numeric metrics API
+    # Ask user for FROM and TO at runtime
+    FROM = input("Enter FROM timestamp (milliseconds): ").strip()
+    TO = input("Enter TO timestamp (milliseconds): ").strip()
+
+    if not FROM or not TO:
+        logging.error("FROM and TO cannot be empty.")
+        sys.exit(1)
+
+    # Main function to get authentication token, and call numeric metrics API
     token, _ = get_token()
-    fetch_numeric_metrics(token)
+    fetch_numeric_metrics(token, FROM, TO)
 
 if __name__ == "__main__":
     main()
