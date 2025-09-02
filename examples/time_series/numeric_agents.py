@@ -32,7 +32,7 @@ AGGREGATE_FUNCTION = ["AVG"]
 url = f"https://{API_HOST}/time-series/agents/numeric/{groupByDimension}"
 
 
-def fetch_numeric_metrics(token, FROM, TO):
+def fetch_numeric_metrics(token, from_time, to_time):
     # Fetches aggregated metric data from the numeric endpoint
 
     # HTTP headers with authorization
@@ -42,8 +42,8 @@ def fetch_numeric_metrics(token, FROM, TO):
 
     # Query parameters for the GET request
     params = {
-        "from": FROM,
-        "to": TO,
+        "from": from_time,
+        "to": to_time,
         "metrics": METRICS,
         "aggregateFunctions": AGGREGATE_FUNCTION,
         "timeBucket": TIME_BUCKET
@@ -112,17 +112,17 @@ def log_numeric_summary(data):
 
 
 def main():
-    # Ask user for FROM and TO at runtime
-    FROM = input("Enter FROM timestamp (milliseconds): ").strip()
-    TO = input("Enter TO timestamp (milliseconds): ").strip()
+    # Ask user for from_time and TO at runtime
+    from_time = input("Enter from_time timestamp (milliseconds): ").strip()
+    to_time = input("Enter to_time timestamp (milliseconds): ").strip()
 
-    if not FROM or not TO:
-        logging.error("FROM and TO cannot be empty.")
+    if not from_time or not to_time:
+        logging.error("from_time and to_time cannot be empty.")
         sys.exit(1)
 
     # Main function to get authentication token, and call numeric metrics API
     token, _ = get_token()
-    fetch_numeric_metrics(token, FROM, TO)
+    fetch_numeric_metrics(token, from_time, to_time)
 
 if __name__ == "__main__":
     main()
