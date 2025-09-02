@@ -25,13 +25,13 @@ API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 kpi_url = f"https://{API_HOST}/kpis/sensors/organizations"
 
 
-def fetch_sensor_kpis_by_org(token, KPI_CODE):
+def fetch_sensor_kpis_by_org(token, kpi_code):
     # This function fetches KPI data for sensors by organization using the token
     headers = { 
         "Authorization": f"Bearer {token}"
     }
     params = {
-        "kpiCodes": KPI_CODE
+        "kpiCodes": kpi_code
     }
 
     try:
@@ -89,16 +89,16 @@ def log_kpi_summary(data):
 
 
 def main():
-    # Ask user for KPI_CODE at runtime
-    KPI_CODE = input("Enter the KPI code: ").strip()
-    if not KPI_CODE:
+    # Ask user for kpi_code at runtime
+    kpi_code = input("Enter the KPI code: ").strip()
+    if not kpi_code:
         logging.error("KPI code cannot be empty.")
         sys.exit(1)
 
     # Fetches the token from the auth_utils.py file
     token, _ = get_token()
     # Calls the API using that token
-    fetch_sensor_kpis_by_org(token, KPI_CODE)
+    fetch_sensor_kpis_by_org(token, kpi_code)
 
 
 if __name__ == "__main__":

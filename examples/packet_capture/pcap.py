@@ -22,9 +22,9 @@ logging.basicConfig(
 # Environment variables
 API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
-def start_packet_capture(token, SENSOR_ID):
+def start_packet_capture(token, sensor_id):
     # Sends a POST request to initiate packet capture on a given sensor/AP.
-    url = f"https://{API_HOST}/on-demand-tests/sensors/{SENSOR_ID}/packet-capture"
+    url = f"https://{API_HOST}/on-demand-tests/sensors/{sensor_id}/packet-capture"
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {token}",
@@ -55,10 +55,10 @@ def start_packet_capture(token, SENSOR_ID):
     logging.info(f"Packet capture started, response: {data}")
     return data
 
-def get_packet_capture_status(token, SENSOR_ID, test_id):
+def get_packet_capture_status(token, sensor_id, test_id):
     # Get packet capture status
     # Returns JSON response if available, or None if status file isn't ready yet (404).
-    url = f"https://{API_HOST}/on-demand-tests/sensors/{SENSOR_ID}/packet-capture/{test_id}"
+    url = f"https://{API_HOST}/on-demand-tests/sensors/{sensor_id}/packet-capture/{test_id}"
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {token}"
@@ -77,9 +77,9 @@ def get_packet_capture_status(token, SENSOR_ID, test_id):
         logging.error(f"Error fetching status: {e}")
         return None
 
-def download_packet_capture(token, SENSOR_ID, test_id):
+def download_packet_capture(token, sensor_id, test_id):
     # Downloads the completed pcap file and saves it locally.
-    url = f"https://{API_HOST}/on-demand-tests/sensors/{SENSOR_ID}/packet-capture/{test_id}/download"
+    url = f"https://{API_HOST}/on-demand-tests/sensors/{sensor_id}/packet-capture/{test_id}/download"
     headers = {
         "accept": "application/octet-stream",
         "Authorization": f"Bearer {token}"
@@ -104,17 +104,17 @@ def download_packet_capture(token, SENSOR_ID, test_id):
     return filename
 
 def main():
-    # Ask user for SENSOR_ID at runtime
-    SENSOR_ID = input("Enter the SENSOR ID: ").strip()
-    if not SENSOR_ID:
-        logging.error("SENSOR_ID cannot be empty.")
+    # Ask user for sensor_id at runtime
+    sensor_id = input("Enter the SENSOR ID: ").strip()
+    if not sensor_id:
+        logging.error("sensor_id cannot be empty.")
         sys.exit(1)
     
     # Step 1: Authenticate and get a bearer token
     token, _ = get_token()
 
     # Step 2: Start the packet capture
-    start_response = start_packet_capture(token, SENSOR_ID)
+    start_response = start_packet_capture(token, sensor_id)
 
     # Extract the testId from response to use for status polling and download
     # Normally the API should always return a testId; if it's missing, the response was unexpected.
@@ -132,7 +132,7 @@ def main():
 
     while retries < max_retries:
         # Request current status of the capture
-        status_response = get_packet_capture_status(token, SENSOR_ID, test_id)
+        status_response = get_packet_capture_status(token, sensor_id, test_id)
         # A 404 usually means the packet capture status file isn’t ready yet, not that the test failed.
         # Returning None tells the loop to wait and retry instead of treating it as an error.
         if status_response is None:
@@ -148,7 +148,7 @@ def main():
         if run_status == "COMPLETE":
             # Step 4: Download the completed capture
             logging.info("Packet capture completed successfully.")
-            download_packet_capture(token, SENSOR_ID, test_id)
+            download_packet_capture(token, sensor_id, test_id)
             break
         elif run_status == "FAILED":
             # Capture failed (log reason if available)
