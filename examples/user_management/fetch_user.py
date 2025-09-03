@@ -19,17 +19,10 @@ logging.basicConfig(
 ) 
 
 # Define API host from environment
-API_HOST = os.getenv("API_HOST")
-if not API_HOST:
-    raise ValueError("API_HOST environment variable not set")
-
-# Construct the full API URL
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 # Fetch users endpoint URL
 users_url = f"https://{API_HOST}/users"
-if not users_url:
-    raise ValueError("USERS_URL variable not set")
-
 
 def fetch_users(token):
     # This function fetches the users from the /users endpoint using the token

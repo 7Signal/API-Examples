@@ -20,19 +20,7 @@ logging.basicConfig(
 )
 
 # Load environment variables
-FROM = os.getenv("FROM")
-TO = os.getenv("TO")
-API_HOST = os.getenv("API_HOST")
-
-# Error response if environment variables are missing
-if not API_HOST:
-    raise EnvironmentError("The API_HOST variable seems to be missing, please check if it is set.")
-
-if not FROM:
-    raise EnvironmentError("The FROM environment variable may not be set. Ex: 1755537748000 (must be in milliseconds).")
-
-if not TO:
-    raise EnvironmentError("The TO environment variable may not be set. Ex: 1755537748000 (must be in milliseconds).")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 # Hardcoded values
 METRICS = ["EXPERIENCE_SCORE"]
@@ -44,7 +32,7 @@ AGGREGATE_FUNCTION = ["AVG"]
 url = f"https://{API_HOST}/time-series/agents/numeric/{groupByDimension}"
 
 
-def fetch_numeric_metrics(token):
+def fetch_numeric_metrics(token, from_time, to_time):
     # Fetches aggregated metric data from the numeric endpoint
 
     # HTTP headers with authorization
@@ -54,8 +42,8 @@ def fetch_numeric_metrics(token):
 
     # Query parameters for the GET request
     params = {
-        "from": FROM,
-        "to": TO,
+        "from": from_time,
+        "to": to_time,
         "metrics": METRICS,
         "aggregateFunctions": AGGREGATE_FUNCTION,
         "timeBucket": TIME_BUCKET
@@ -124,9 +112,17 @@ def log_numeric_summary(data):
 
 
 def main():
-    # # Main function to get authentication token, and call numeric metrics API
+    # Ask user for from_time and TO at runtime
+    from_time = input("Enter from_time timestamp (milliseconds): ").strip()
+    to_time = input("Enter to_time timestamp (milliseconds): ").strip()
+
+    if not from_time or not to_time:
+        logging.error("from_time and to_time cannot be empty.")
+        sys.exit(1)
+
+    # Main function to get authentication token, and call numeric metrics API
     token, _ = get_token()
-    fetch_numeric_metrics(token)
+    fetch_numeric_metrics(token, from_time, to_time)
 
 if __name__ == "__main__":
     main()

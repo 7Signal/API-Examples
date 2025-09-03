@@ -1,5 +1,11 @@
 import pytest
-from unittest.mock import MagicMock, patch
+import sys
+import os
+from unittest.mock import patch, MagicMock
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+# Import the module to be tested
 from examples.rate_limiting import rate_limit
 
 # Helper function to create a mocked HTTP response object

@@ -22,13 +22,9 @@ logging.basicConfig(
 )
 
 # Define API host from environment
-API_HOST = os.getenv("API_HOST")
-if not API_HOST:
-    raise ValueError("API_HOST environment variable not set")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 # Construct the full API URL
-
-# Get the API endpoint
 EYES_URL = f"https://{API_HOST}/eyes"
 
 # If the API URL isn’t set, crash early with a clear error

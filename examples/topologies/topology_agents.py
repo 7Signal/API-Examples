@@ -19,9 +19,7 @@ logging.basicConfig(
 )
 
 # Define API host from environment
-API_HOST = os.getenv("API_HOST")
-if not API_HOST:
-    raise ValueError("API_HOST environment variable not set")
+API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 def fetch_topologies_agents_locations(token):
    # Fetch topology agent location data from the API.
