@@ -24,35 +24,34 @@ Example Code for 7SIGNAL's API
     `pip install requests`
 
 ### Configure Settings
-These files require 3 main environment variables:
+These files require 2 main environment variables:
 
 ```
 export API_KEY=“your-client-id”
 export API_SECRET=“your-client-secret”
-export API_HOST="api-v2-integration.dev.7signal.com"
 ```
 
-Depending on the script you want to run, you need to set a couple of additional environment variables:
+Depending on the script you want to run, it will ask you to set a couple of additional variables:
 
 Eyes Endpoint
 
-    export AGENT_ID="your-agent-id"
+    Enter the Agent ID: "your-agent-id"
     
 
 KPI Endpoint
     
-    export KPI_CODE="your-kpi-code"
+    Enter the KPI code: "your-kpi-code"
 
 
 Packet Capture Endpoint
     
-    export SENSOR_ID="your-sensor-id"
+    Enter the SENSOR ID: "your-sensor-id"
 
 
 Time Series Endpoint
     
-    export TO="your-current-epoch-time-in-milliseconds"
-    export FROM="your-epoch-time-you’re-measuring-from-in-milliseconds"
+    Enter from_time timestamp (milliseconds): "your-epoch-time-you’re-measuring-from-in-milliseconds"
+    Enter to_time timestamp (milliseconds): "your-current-epoch-time-in-milliseconds"
 
 
 ### Run the Python Script
@@ -73,39 +72,11 @@ ex: Topologies
 ## Windows
 If you are using Powershell:
 ### Configure Settings
-These files require 3 main environment variables:
+These files require 2 main environment variables:
 
 ```
 $env:API_KEY="your_api_key_here"
 $env:API_SECRET="your_api_secret_here"
-$env:API_HOST="api-v2-integration.dev.7signal.com"
 ```
-
-Depending on the script you want to run, you need to set a couple of additional environment variables:
-
-
-Eyes Endpoint
-    
-
-    $env:AGENT_ID="your-agent-id"
-
-
-KPI Endpoint
-    
-
-    $env:KPI_CODE="your-kpi-code"
-
-
-Packet Capture Endpoint
-    
-
-    $env:SENSOR_ID="your-sensor-id"
-
-
-Time Series Endpoint
-
-
-    $env:TO="your-current-epoch-time-in-milliseconds"
-    $env:FROM="your-epoch-time-you’re-measuring-from-in-milliseconds"
 
 
