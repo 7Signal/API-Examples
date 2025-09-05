@@ -1,6 +1,5 @@
-hostname
-7SIGNAL_DannyT
-7SIGNAL-Douglas
-aab-lat6e
-aab-m3.local
+hostname,nickname
+WINPC-USER1,WinUser
+DESKTOP-TEST,DesktopTest
+LAPTOP-JOHN,LaptopJohn
 

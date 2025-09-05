@@ -1,3 +1,13 @@
+# This script demonstrates how to license Eyes Agents in bulk using a CSV file.
+# It shows how to:
+#  - Fetch all Eyes Agents from the /eyes/agents endpoint
+#  - Read a list of hostnames from a CSV file
+#  - Match agents by hostname using a dictionary lookup for efficiency
+#  - Send a PATCH request to update each matched agent's "isLicensed" field to True
+
+# Example usage:
+#   python3 csv_licensing.py agents.csv
+
 import os
 import csv
 import logging
@@ -39,6 +49,7 @@ def license_agent(token, agent_id):
     payload = {
         "isLicensed": True
     }
+
     try:
         # PATCH request
         resp = requests.patch(url, headers=headers, json=payload)
@@ -55,18 +66,27 @@ def main():
     # Get API token
     token, _ = get_token()
 
-    # Read hostnames from CSV file
+    # CSV file provided as a command-line prompt
+    if len(sys.argv) < 2:
+        logging.error("Usage: python3 csv_licensing.py <csv_file>")
+        return
+    csv_file = sys.argv[1]
+
+    # Read CSV file 
     try:
-        with open("agents.csv") as f:
-            # Read CSV rows as dictionaries
-            rows = list(csv.DictReader(f))
+        with open(csv_file) as f:
+            csv_rows = csv.DictReader(f)
+            # rows are dictionaries with a "hostname" column
+            rows = list(csv_rows)
     except Exception as e:
-        # Log error if CSV can't be read
-        logging.error(f"Error reading CSV: {e}")
+        logging.error(f"Error reading CSV {csv_file}: {e}")
         return
 
     # Fetch all agents from API
     agents = fetch_agents(token)
+
+  # Build a lookup dictionary
+    agents_dict = { (a.get("name") or "").lower(): a for a in agents }
 
     # Loop over each row in the CSV
     for row in rows:
@@ -75,8 +95,8 @@ def main():
             # Skip empty rows
             continue
 
-        # Find the first agent whose name contains the CSV hostname
-        match = next((a for a in agents if hostname in (a.get("name") or "").lower()), None)
+        # Lookup agent directly
+        match = agents_dict.get(hostname)
         if match:
             # License the matched agent
             license_agent(token, match["id"])
