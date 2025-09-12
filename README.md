@@ -22,6 +22,10 @@ Example Code for 7SIGNAL's API
     
     `pip install requests`
 
+2. For examples/eyes/last_monitored_devices.py
+
+    `pip install matplotlib`
+
 ## Windows
 ### If you are using Command Line:
 These files require 2 main environment variables:
@@ -89,6 +93,14 @@ Getting current epoch time using Python:
 
 
 ## Run the Python Script
+ex: Eyes - Chart Data for Devices
+
+
+    cd examples/eyes
+    python last_monitored_devices.py
+    open sla_report.html
+
+
 ex: Eyes - CSV Licensing
 
 
