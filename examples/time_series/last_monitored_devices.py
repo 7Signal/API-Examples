@@ -183,7 +183,7 @@ def main():
         # Store charts under the device's name
         devices_charts[f"{device_name} ({device_id})"] = charts
 
-    # Store charts under the device's name
+    # Generate the HTML report for all devices
     build_html_report(devices_charts)
 
 
