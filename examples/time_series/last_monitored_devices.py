@@ -64,12 +64,12 @@ def fetch_time_series(token, device_id, from_time, to_time):
     # Construct numeric endpoint URL
     url = f"https://{API_HOST}/time-series/agents/numeric/{groupByDimension}"
     params = {
-    "from": from_time,
-    "to": to_time,
-    "timeBucket": TIME_BUCKET,
-    "aggregateFunctions": AGGREGATE_FUNCTION,
-    "metrics": ",".join(METRICS),
-    "deviceId": device_id,
+        "from": from_time,
+        "to": to_time,
+        "timeBucket": TIME_BUCKET,
+        "aggregateFunctions": ",".join(AGGREGATE_FUNCTION),
+        "metrics": ",".join(METRICS),
+        "deviceId": device_id,   # <-- include deviceId here
     }
     headers = {
         "Authorization": f"Bearer {token}"
@@ -177,7 +177,6 @@ def main():
         for res in results:
             for agg in res.get("metricAggregates", []):
                 metric = agg.get("metric")
-                # Create a chart and encode it in base64
                 img_base64 = plot_chart_base64(agg.get("timeSeries", []), metric)
                 charts[metric] = img_base64
 
