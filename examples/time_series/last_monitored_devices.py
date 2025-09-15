@@ -26,7 +26,14 @@ logging.basicConfig(
 
 # Load environment variables and constants
 API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
-METRICS = ["SEVEN_MCS", "ROAMING", "COVERAGE", "CONGESTION", "INTERFERENCE"]
+METRICS = [
+    "APPLICATION_CONNECTIVITY",
+    "NETWORK_CONNECTIVITY",
+    "ROAMING",
+    "COVERAGE",
+    "CONGESTION",
+    "INTERFERENCE",
+]
 TIME_BUCKET = "10_MIN"
 AGGREGATE_FUNCTION = ["AVG"]
 groupByDimension = "deviceId"
@@ -34,7 +41,7 @@ groupByDimension = "deviceId"
 # Fetches the last monitored devices from the Eyes Agents API.
 def fetch_devices(token, limit=3):
     # Construct the API URL to fetch Eyes Agents
-    url = f"https://{API_HOST}/eyes/agents?limit={limit}&sort=last_monitored"
+    url = f"https://{API_HOST}/eyes/agents?limit={limit}&sort=lastTestSeen&order=desc"
     headers = {
         "Authorization": f"Bearer {token}"
     }
@@ -57,12 +64,12 @@ def fetch_time_series(token, device_id, from_time, to_time):
     # Construct numeric endpoint URL
     url = f"https://{API_HOST}/time-series/agents/numeric/{groupByDimension}"
     params = {
-        "from": from_time,
-        "to": to_time,
-        "timeBucket": TIME_BUCKET,
-        "aggregateFunctions": "AVG",
-        "metrics": ",".join(METRICS),
-        "deviceId": device_id,
+    "from": from_time,
+    "to": to_time,
+    "timeBucket": TIME_BUCKET,
+    "aggregateFunctions": AGGREGATE_FUNCTION,
+    "metrics": ",".join(METRICS),
+    "deviceId": device_id,
     }
     headers = {
         "Authorization": f"Bearer {token}"
@@ -87,8 +94,8 @@ def plot_chart_base64(time_series, metric):
     time_series.sort(key=lambda x: x["ts"])
     # Convert timestamps from milliseconds to datetime objects (UTC)
     times = [datetime.utcfromtimestamp(p["ts"] / 1000) for p in time_series]
-    # Extract the aggregated values (average SLA %) for plotting
-    values = [p.get("avg", 0) for p in time_series]
+    # Extract SLA values and convert decimals (0–1) into percentages (0–100)
+    values = [p.get("avg", 0) * 100 for p in time_series]
 
     # Create the chart
     plt.figure(figsize=(6, 3))
