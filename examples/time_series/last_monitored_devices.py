@@ -69,7 +69,7 @@ def fetch_time_series(token, device_id, from_time, to_time):
         "timeBucket": TIME_BUCKET,
         "aggregateFunctions": ",".join(AGGREGATE_FUNCTION),
         "metrics": ",".join(METRICS),
-        "deviceId": device_id,   # <-- include deviceId here
+        "deviceId": device_id,
     }
     headers = {
         "Authorization": f"Bearer {token}"
