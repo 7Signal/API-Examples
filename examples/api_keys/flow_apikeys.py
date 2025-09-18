@@ -1,3 +1,10 @@
+# This script demonstrates how to make authenticated API calls to fetch API Keys.
+# It shows how to:
+#  - Make a GET request to the /apikeys endpoint using a bearer token
+#  - Print a summary of each API key (ID, description, createdBy)
+#  - Prompt the user to optionally view detailed information for a specific API key
+#  - Fetch and display details from /apikeys/{apiKeyId}, including permissions and linked organization/group IDs
+
 import os
 import requests
 import logging
@@ -22,11 +29,18 @@ def list_api_keys(token):
     headers = {
         "Authorization": f"Bearer {token}"
     }
-    # GET request to /apikeys endpoint
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    # Returns a list of API key dictionaries from the 'results' key.
-    return response.json().get("results", [])
+    try:
+        # GET request to /apikeys endpoint
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        # Returns a list of API key dictionaries from the 'results' key.
+        return response.json().get("results", [])
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 403:
+            logging.error("Access denied: Organization admin privileges are required to list API keys.")
+            sys.exit(1)
+        else:
+            raise
 
 
 # Fetch detailed information about a specific API key by ID
@@ -35,11 +49,18 @@ def get_api_key_details(token, apiKeyId):
     headers = {
         "Authorization": f"Bearer {token}"
     }
-    # GET request to /apikeys/{apiKeyId}
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    # Returns the full API key details as a dictionary.
-    return response.json()
+    try:
+        # GET request to /apikeys/{apiKeyId}
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        # Returns the full API key details as a dictionary.
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 403:
+            logging.error("Access denied: Organization admin privileges are required to view API key details.")
+            sys.exit(1)
+        else:
+            raise
 
 
 # Main Function
