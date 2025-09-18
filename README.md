@@ -93,10 +93,10 @@ Getting current epoch time using Python:
 
 
 ## Run the Python Script
-ex: Eyes - Chart Data for Devices
+ex: Time Series - Last Monitored Devices
 
-
-    cd examples/eyes
+    
+    cd examples/time_series
     python last_monitored_devices.py
     open sla_report.html
 
