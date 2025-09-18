@@ -20,14 +20,19 @@ API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 def list_access_point_agents(token):
     # Construct endpoint URL
     url = f"https://{API_HOST}/access-points/agents"
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
+    headers = {"Authorization": f"Bearer {token}"}
     
     # GET request
     response = requests.get(url, headers=headers)
     # Raise exception if HTTP status indicates error
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 403:
+            logging.error("Access denied: You need 'organization admin' privileges to list access point agents.")
+        else:
+            logging.error(f"HTTP error while listing access point agents: {e}")
+        return []
     # Return 'results' list or empty list
     return response.json().get("results", [])
 
@@ -35,14 +40,19 @@ def list_access_point_agents(token):
 def get_agent_details(token, accessPointId):
     # Construct endpoint URL
     url = f"https://{API_HOST}/access-points/agents/{accessPointId}"
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
+    headers = {"Authorization": f"Bearer {token}"}
 
     # GET request
     response = requests.get(url, headers=headers)
     # Raise exception if HTTP status indicates error
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 403:
+            logging.error("Access denied: You need 'organization admin' privileges to view access point details.")
+        else:
+            logging.error(f"HTTP error while fetching access point details: {e}")
+        return {}
     return response.json()
 
 
@@ -52,23 +62,28 @@ def main():
     token, _ = get_token()
 
     # Step 1: List agents
-    agents = list_access_point_agents(token)
-    print("Available Access Point Agents:")
-    for agent in agents:
+    access_points = list_access_point_agents(token)
+    print("Available Access Points:")
+    for agent in access_points:
         # Print a compact summary of each agent (ID, Name, Controller)
         print(f"- ID: {agent['id']} | Name: {agent.get('name', 'N/A')} | Controller: {agent.get('controller', 'N/A')}")
 
-    if not agents:
+    if not access_points:
         # Exit if no agents found
-        print("No agents found.")
+        print("No Access Points found (or insufficient privileges).")
         sys.exit(0)
 
     # Step 2: Ask if user wants details
-    choice = input("\nWould you like to see detailed information for an agent? (yes/no): ").strip().lower()
+    choice = input("\nWould you like to see detailed information for an access point? (yes/no): ").strip().lower()
     if choice == "yes":
         # Ask for the specific agent ID
         chosen_id = input("Enter the ID of the agent you want details for: ").strip()
         details = get_agent_details(token, chosen_id)
+
+        if not details:
+            # Exit if unable to fetch details
+            print("Unable to fetch details (check privileges or ID).")
+            sys.exit(1)
 
         # Print main info
         print("\nDetailed Agent Information:")
