@@ -98,7 +98,12 @@ ex: Time Series - Last Monitored Devices
     
     cd examples/time_series
     python last_monitored_devices.py
+    
+    # For macOS
     open sla_report.html
+
+    # For Windows
+    start sla_report.html
 
 
 ex: Eyes - CSV Licensing
