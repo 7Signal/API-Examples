@@ -4,6 +4,13 @@
 #  - Fetch the "Reporter" role UUID from the /roles endpoint
 #  - Send POST requests to create each user with the Reporter role
 
+# !!!!!!!!!!!!!!!!!!!!!!
+# Note: This script requires the API key being used to have been granted the 
+# organization-admin role.
+# !!!!!!!!!!!!!!!!!!!!!!
+
+# This role is the only role which can create or modify users.
+
 # Example usage:
 #   python3 add_users_from_csv.py users.csv
 
@@ -119,6 +126,9 @@ def create_user(token, first_name, last_name, email, role_id, organization_id):
         return False
 
 def main():
+    # Notice or role requirement:
+    logging.warning("This script requires the Oragnization Admin role!")
+
     # Get API token
     token, _ = get_token()
     
