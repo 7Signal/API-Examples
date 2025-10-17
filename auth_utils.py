@@ -14,7 +14,7 @@ import requests
 logging.basicConfig(
 
     # Level: set the minimum level of messages to DEBUG for more detail
-    level = logging.DEBUG,
+    level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper()),
 
     # Format for how the log messages will appear: Ti,estamp + log level + message
     format = "%(asctime)s [%(levelname)s] %(message)s"
