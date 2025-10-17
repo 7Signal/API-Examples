@@ -6,6 +6,9 @@
 #  - Enforce a maximum retry limit using a circuit breaker
 #  - Log and interpret rate limiting headers
 
+# You may wish to enable DEBUG logging for this script in order to see the
+# rate limiting information printed on the screen.
+
 import requests
 import time
 import logging
@@ -54,10 +57,10 @@ def handle_rate_limits(api_func):
         replenish = response.headers.get("x-ratelimit-replenish-rate")
         requested = response.headers.get("x-ratelimit-requested-tokens")
 
-        logging.info(f"ratelimit-remaining: {remaining}")
-        logging.info(f"ratelimit-burst-capacity: {burst}")
-        logging.info(f"ratelimit-replenish-rate: {replenish}")
-        logging.info(f"ratelimit-requested-tokens: {requested}")
+        logging.debug(f"ratelimit-remaining: {remaining}")
+        logging.debug(f"ratelimit-burst-capacity: {burst}")
+        logging.debug(f"ratelimit-replenish-rate: {replenish}")
+        logging.debug(f"ratelimit-requested-tokens: {requested}")
 
         # Handle rate limiting if we get a 429 Too Many Requests response
         if response.status_code == 429:

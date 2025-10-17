@@ -26,6 +26,10 @@ Example Code for 7SIGNAL's API
 
     `pip install matplotlib`
 
+## Logging
+By default these scripts will print INFO statements and above. 
+To see DEBUG statements set the `LOG_LEVEL=DEBUG` environment variable.
+
 ## Windows
 ### If you are using Command Line:
 These files require 2 main environment variables:
