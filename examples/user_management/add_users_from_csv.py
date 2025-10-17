@@ -20,9 +20,11 @@ import logging
 import requests
 import sys
 
-# Make sure we can import get_token
+# Make sure we can import get_token and handle_rate_limits
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from auth_utils import get_token
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'rate_limiting')))
+from rate_limit import handle_rate_limits
 
 # Setup logging configuration
 logging.basicConfig(
@@ -33,23 +35,17 @@ logging.basicConfig(
 API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 def fetch_reporter_role_id(token):
-    # Fetch the Reporter role UUID from the /roles endpoint
-    # If you wish to create users with more privledge you can
-    # search for roles of:
-    #   customer:reporter (read only)
-    #   customer:configurator (ability to create test profiles, modify settings, etc)
-    #   customer:organization-admin (ability to modify all, including users and permissions)
-
     url = f"https://{API_HOST}/roles"
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    def api_call():
+        return requests.get(url, headers=headers)
     
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        
+        data = handle_rate_limits(api_call)
+        if not data:
+            return None
+            
         # Find the Reporter role (try multiple possible keys)
         for role in data.get("results", []):
             role_key = role.get("key", "")
@@ -65,19 +61,16 @@ def fetch_reporter_role_id(token):
         return None
 
 def fetch_organization_id(token):
-    # Fetch your organization ID from the /organizations endpoint
-    # This is required when creating new users. Most users will have
-    # only one possible organization.
-
     url = f"https://{API_HOST}/organizations"
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    def api_call():
+        return requests.get(url, headers=headers)
     
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        data = response.json()
+        data = handle_rate_limits(api_call)
+        if not data:
+            return None
         
         # Get the first organization
         results = data.get("results", [])
@@ -95,7 +88,6 @@ def fetch_organization_id(token):
         return None
 
 def create_user(token, first_name, last_name, email, role_id, organization_id):
-    # Create a new user via POST to /users endpoint
     url = f"https://{API_HOST}/users"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -107,19 +99,17 @@ def create_user(token, first_name, last_name, email, role_id, organization_id):
         "lastName": last_name,
         "email": email,
         "organizationId": organization_id,
-        "role": {
-            "id": role_id
-        }
+        "roleId": role_id
     }
     
+    def api_call():
+        return requests.post(url, headers=headers, json=payload)
+    
     try:
-        response = requests.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        logging.info(f"Created user: {first_name} {last_name} ({email})")
-        return True
-    except requests.exceptions.HTTPError as e:
-        logging.error(f"Failed to create user {email}: HTTP {response.status_code}")
-        logging.error(f"Response: {response.text}")
+        data = handle_rate_limits(api_call)
+        if data is not None:
+            logging.info(f"Created user: {first_name} {last_name} ({email})")
+            return True
         return False
     except Exception as e:
         logging.error(f"Failed to create user {email}: {e}")
