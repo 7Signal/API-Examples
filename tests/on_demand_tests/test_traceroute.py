@@ -28,7 +28,7 @@ def test_start_traceroute_success(mock_post, caplog):
     token = "fake-token"
     SENSOR_ID = "sensor-001"
     ACCESS_POINT_ID = 42
-    TARGET_HOST = "8.8.8.8"
+    TARGET_HOST = "192.0.2.1"
 
     with caplog.at_level("INFO"):
         response = traceroute.start_traceroute(token, SENSOR_ID, ACCESS_POINT_ID, TARGET_HOST)
@@ -73,30 +73,30 @@ def test_get_traceroute_status_404_returns_none(mock_get):
 SAMPLE_RESULTS = {
     "attachTimeMilliseconds": 912,
     "ipRetrievalTimeMilliseconds": 1369,
-    "ipAddress": "192.168.50.44",
-    "gatewayAddress": "192.168.50.1",
+    "ipAddress": "192.0.2.44",
+    "gatewayAddress": "192.0.2.1",
     "traceRouteResults": [
         {
             "hop": 1,
-            "ipAddress": "192.168.50.1",
+            "ipAddress": "192.0.2.1",
             "timeMilliseconds": [4524, 5571, 4439, 4684, 4119],
             "ttl": [64, 64, 64, 64, 64]
         },
         {
             "hop": 2,
-            "ipAddress": "67.159.206.190",
+            "ipAddress": "192.0.2.190",
             "timeMilliseconds": [5754, 5798, 7483, 6636, 6816],
             "ttl": [254, 254, 254, 254, 254]
         },
         {
             "hop": 3,
-            "ipAddress": "216.66.73.141",
+            "ipAddress": "192.0.2.141",
             "timeMilliseconds": [7330, 6834, 6490, 6678, 6768],
             "ttl": [62, 62, 62, 62, 62]
         },
         {
             "hop": 4,
-            "ipAddress": "184.105.222.45",
+            "ipAddress": "192.0.2.45",
             "timeMilliseconds": [19019, 19724, None, None, None],
             "ttl": [61, 61, None, None, None]
         }
@@ -115,13 +115,13 @@ def test_display_traceroute_results(capsys):
     assert "CONNECTION" in output
     assert "912 ms" in output
     assert "1369 ms" in output
-    assert "192.168.50.44" in output
-    assert "192.168.50.1" in output
+    assert "192.0.2.44" in output
+    assert "192.0.2.1" in output
 
     # Verify route table
     assert "ROUTE" in output
-    assert "67.159.206.190" in output
-    assert "216.66.73.141" in output
+    assert "192.0.2.190" in output
+    assert "192.0.2.141" in output
 
     # Verify null probes shown as asterisks
     assert "*" in output
@@ -133,8 +133,8 @@ def test_display_traceroute_results(capsys):
 # Test that draw_latency_chart returns a valid chart string
 def test_draw_latency_chart():
     hops = [
-        {"hop": 1, "ipAddress": "192.168.50.1", "timeMilliseconds": [4524, 5571, 4439]},
-        {"hop": 2, "ipAddress": "10.0.0.1", "timeMilliseconds": [5754, 5798, 7483]},
+        {"hop": 1, "ipAddress": "192.0.2.1", "timeMilliseconds": [4524, 5571, 4439]},
+        {"hop": 2, "ipAddress": "192.0.2.2", "timeMilliseconds": [5754, 5798, 7483]},
     ]
     chart = traceroute.draw_latency_chart(hops)
 
@@ -148,11 +148,11 @@ def test_draw_latency_chart():
 def test_display_traceroute_results_partial_data(capsys):
     partial_results = {
         "attachTimeMilliseconds": 500,
-        "ipAddress": "10.0.0.1",
+        "ipAddress": "192.0.2.10",
     }
     traceroute.display_traceroute_results(partial_results)
     output = capsys.readouterr().out
 
     assert "TRACEROUTE RESULTS" in output
     assert "500 ms" in output
-    assert "10.0.0.1" in output
+    assert "192.0.2.10" in output

@@ -105,9 +105,9 @@ SAMPLE_RESULTS = {
         "country": "United States",
     },
     "interface": {
-        "internalIp": "192.168.50.38",
+        "internalIp": "192.0.2.38",
         "macAddress": "B8:99:19:63:16:8D",
-        "externalIp": "67.159.206.177",
+        "externalIp": "192.0.2.177",
         "vpn": False,
         "interface": "ath2",
     },
@@ -137,7 +137,7 @@ def test_display_speedtest_results(capsys):
 
     # Verify specific data values appear
     assert "Independents Fiber Network" in output
-    assert "192.168.50.38" in output
+    assert "192.0.2.38" in output
 
 # Test that draw_throughput_chart returns a valid chart string
 def test_draw_throughput_chart():

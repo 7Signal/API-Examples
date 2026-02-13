@@ -72,8 +72,8 @@ def test_get_http_download_status_404_returns_none(mock_get):
 SAMPLE_RESULTS = {
     "attachTimeMilliseconds": 758,
     "ipRetrievalTimeMilliseconds": 1094,
-    "ipAddress": "192.168.50.38",
-    "gatewayAddress": "192.168.50.1",
+    "ipAddress": "192.0.2.38",
+    "gatewayAddress": "192.0.2.1",
     "httpDownloadResults": [
         {
             "testNumber": 1,
@@ -95,8 +95,8 @@ def test_display_http_download_results(capsys):
     assert "CONNECTION" in output
     assert "758 ms" in output
     assert "1094 ms" in output
-    assert "192.168.50.38" in output
-    assert "192.168.50.1" in output
+    assert "192.0.2.38" in output
+    assert "192.0.2.1" in output
 
     # Verify download section
     assert "DOWNLOAD" in output
@@ -125,11 +125,11 @@ def test_draw_throughput_chart():
 def test_display_http_download_results_partial_data(capsys):
     partial_results = {
         "attachTimeMilliseconds": 500,
-        "ipAddress": "10.0.0.1",
+        "ipAddress": "192.0.2.10",
     }
     http_download.display_http_download_results(partial_results)
     output = capsys.readouterr().out
 
     assert "HTTP DOWNLOAD RESULTS" in output
     assert "500 ms" in output
-    assert "10.0.0.1" in output
+    assert "192.0.2.10" in output
