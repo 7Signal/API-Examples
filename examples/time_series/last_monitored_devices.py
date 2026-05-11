@@ -1,8 +1,11 @@
-# This script demonstrates how to generate SLA charts for recently monitored devices.
+# This script demonstrates how to combine two API concepts to generate SLA charts for recently monitored devices.
 # It shows how to:
-#  - Fetch the last 3 monitored devices from the Eyes Agents API
-#  - Query the /time-series/agents/numeric/{groupByDimension} endpoint for SLA metrics
-#  - Generate charts (0–100% scale) for SEVEN_MCS, ROAMING, COVERAGE, CONGESTION, and INTERFERENCE
+#  - Fetch the last 3 monitored devices from the Eyes Agents API (/eyes/agents)
+#  - Use the device IDs returned from that call to query a second endpoint:
+#    /time-series/agents/numeric/{groupByDimension} for numeric SLA metrics
+#  - These are two separate API areas (Eyes and Time Series) used together in a single workflow
+#  - Generate charts (0–100% scale) for APPLICATION_CONNECTIVITY, NETWORK_CONNECTIVITY,
+#    ROAMING, COVERAGE, CONGESTION, and INTERFERENCE
 #  - Embed the charts as base64 images into a single HTML report for easy viewing
 
 import os

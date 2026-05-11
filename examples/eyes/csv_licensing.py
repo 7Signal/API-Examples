@@ -85,7 +85,7 @@ def main():
     # Fetch all agents from API
     agents = fetch_agents(token)
 
-  # Build a lookup dictionary
+    # Build a lookup dictionary
     agents_dict = { (a.get("name") or "").lower(): a for a in agents }
 
     # Loop over each row in the CSV
