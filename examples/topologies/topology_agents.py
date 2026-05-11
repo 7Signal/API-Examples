@@ -1,6 +1,6 @@
-# This script demonstrates how to fetch and log topology agent location data from the API.
+# This script demonstrates how to fetch and log agent location data from the API.
 # It shows how to:
-#  - Retrieve agents' location details from the /topologies/agents/locations endpoint
+#  - Retrieve agents' location details from the /locations/agents endpoint
 #  - Log each location's ID, name, address, creation date, and last update date
 
 import os
@@ -22,10 +22,10 @@ logging.basicConfig(
 API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 def fetch_topologies_agents_locations(token):
-   # Fetch topology agent location data from the API.
+    # Fetch agent location data from the API.
 
     # Construct the request URL
-    url = f"https://{API_HOST}/topologies/agents/locations"
+    url = f"https://{API_HOST}/locations/agents"
 
     # Set HTTP headers
     headers = {
@@ -33,7 +33,7 @@ def fetch_topologies_agents_locations(token):
         "Content-Type": "application/json"
     }
 
-    logging.info("Fetching topologies agents locations from %s", url)
+    logging.info("Fetching agent locations from %s", url)
 
     try:
         # Make a GET request to the API
@@ -43,12 +43,12 @@ def fetch_topologies_agents_locations(token):
 
         # Parse JSON response into a Python dictionary
         data = response.json()
-        logging.info("Topologies Agents Locations fetched successfully.")
+        logging.info("Agent locations fetched successfully.")
         return data
     
     # Log any network or request errors
     except requests.exceptions.RequestException as e:
-        logging.error("Error fetching topologies agents locations: %s", e)
+        logging.error("Error fetching agent locations: %s", e)
         return None
 
 def log_topologies_agents_locations(data):
@@ -56,7 +56,7 @@ def log_topologies_agents_locations(data):
 
     # Check if data is present and contains "results"
     if not data or "results" not in data:
-        logging.warning("No results found in topologies agents locations data.")
+        logging.warning("No results found in agent locations data.")
         return
 
     # Iterate through each location entry and log its details
@@ -71,7 +71,7 @@ def log_topologies_agents_locations(data):
        )
 
 def main():
-    # Main function to get authentication token, fetch topology agent locations, and log them.
+    # Main function to get authentication token, fetch agent locations, and log them.
     token, _ = get_token()
     data = fetch_topologies_agents_locations(token)
     log_topologies_agents_locations(data)

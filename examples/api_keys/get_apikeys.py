@@ -68,6 +68,7 @@ def log_response_data(response_data):
     for i, item in enumerate(results, start=1):
         logging.info(f"  Result #{i}:")
         logging.info(f"    id: {item.get('id')}")
+        # WARNING: API keys are sensitive credentials — do not log or share them in real applications.
         logging.info(f"    apiKey: {item.get('apiKey')}")
         logging.info(f"    createdBy: {item.get('createdBy')}")
         logging.info(f"    description: {item.get('description')}")

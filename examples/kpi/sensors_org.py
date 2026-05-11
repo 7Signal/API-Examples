@@ -69,23 +69,30 @@ def log_kpi_summary(data):
         logging.info(f"KPI: {result.get('name')} ({result.get('kpiCode')})")
         logging.info(f"Description: {result.get('description')}")
 
-        for m in result.get("measurements24GHz", []):
-            logging.info("  Measurement @ 2.4GHz:")
-            logging.info(f"    Status: {m.get('status')}")
-            logging.info(f"    KPI Value: {m.get('kpiValue')}")
-            logging.info(f"    SLA Value: {m.get('slaValue')}")
-            logging.info(f"    Target Value: {m.get('targetValue')}")
-            logging.info(f"    Samples: {m.get('samples')}")
-            logging.info(f"    Created At: {m.get('created_at')}")
-            logging.info(f"    Worst KPI: {m.get('worstKpiName')} ({m.get('worstKpiCode')})")
-            logging.info(f"    Worst KPI Description: {m.get('worstKpiDescription')}")
+        # Log measurements for each frequency band present in the response
+        band_keys = {
+            "measurements24GHz": "2.4GHz",
+            "measurements5GHz":  "5GHz",
+            "measurements6GHz":  "6GHz",
+        }
+        for key, label in band_keys.items():
+            for m in result.get(key, []):
+                logging.info(f"  Measurement @ {label}:")
+                logging.info(f"    Status: {m.get('status')}")
+                logging.info(f"    KPI Value: {m.get('kpiValue')}")
+                logging.info(f"    SLA Value: {m.get('slaValue')}")
+                logging.info(f"    Target Value: {m.get('targetValue')}")
+                logging.info(f"    Samples: {m.get('samples')}")
+                logging.info(f"    Created At: {m.get('created_at')}")
+                logging.info(f"    Worst KPI: {m.get('worstKpiName')} ({m.get('worstKpiCode')})")
+                logging.info(f"    Worst KPI Description: {m.get('worstKpiDescription')}")
 
-            sla_params = m.get("slaParameters", {})
-            logging.info("    SLA Parameters:")
-            logging.info(f"      Comparator: {sla_params.get('comparator')} ({sla_params.get('comparatorOperator')})")
-            logging.info(f"      Target Editable: {sla_params.get('targetEditable')}")
-            thresholds = sla_params.get("thresholdMap", {})
-            logging.info(f"      Thresholds: GREEN={thresholds.get('GREEN')}, YELLOW={thresholds.get('YELLOW')}, RED={thresholds.get('RED')}")
+                sla_params = m.get("slaParameters", {})
+                logging.info("    SLA Parameters:")
+                logging.info(f"      Comparator: {sla_params.get('comparator')} ({sla_params.get('comparatorOperator')})")
+                logging.info(f"      Target Editable: {sla_params.get('targetEditable')}")
+                thresholds = sla_params.get("thresholdMap", {})
+                logging.info(f"      Thresholds: GREEN={thresholds.get('GREEN')}, YELLOW={thresholds.get('YELLOW')}, RED={thresholds.get('RED')}")
 
 
 def main():

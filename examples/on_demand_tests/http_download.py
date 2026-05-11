@@ -38,7 +38,7 @@ def start_http_download(token, sensor_id, access_point_id, duration_seconds=5):
         "testType": "WLAN",
         "accessPointId": access_point_id,
         "testEndpoint": {
-            "testHost": "195.181.171.208", # central1 sonar
+            "testHost": "central1.sonar.7signal.com",
             "testPort": "80",
             "sonarId": None,
             "resolveDNSOnSensor": False
