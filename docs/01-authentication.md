@@ -16,7 +16,7 @@ Analogy: Authentication is similar to checking your ID at an event. When you sho
 
 | **Field** | **Description** |
 | --- | --- |
-| Endpoint | `POST https://api-v2.7signal.com/oauth/token` |
+| Endpoint | `POST https://api-v2.7signal.com/oauth2/token` |
 | Auth Type | Client Credentials (API key & Secret) |
 | Token Format | JSON object with access token, expiry, and token type |
 | Token Lifetime | 24 hours (86,400 seconds) |

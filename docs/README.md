@@ -18,6 +18,7 @@ This directory contains the 7SIGNAL API reference documentation, sourced from th
 | 10 | [KPIs](10-kpis.md) | Key Performance Indicator endpoints for sensors and agents (see migration notes) |
 | 11 | [Organizations, Groups, Roles](11-organizations-groups-roles.md) | Read-only endpoints for identity and access metadata |
 | 12 | [Integration Configs](12-integration-configs.md) | Meraki Cloud API integration configuration and scheduling |
+| 13 | [On-Demand Tests](13-on-demand-tests.md) | Ping, traceroute, HTTP/TCP/UDP throughput, speedtest, iPerf3, MOS, and web download tests |
 
 ## Migration Notes
 
