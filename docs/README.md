@@ -1,6 +1,6 @@
 # 7SIGNAL API Documentation
 
-This directory contains the 7SIGNAL API reference documentation, sourced from the internal Confluence space (`ENGDOC`). The base URL for all API endpoints is `https://api-v2.7signal.com`.
+This directory contains the 7SIGNAL API reference documentation. The base URL for all API endpoints is `https://api-v2.7signal.com`.
 
 ## Contents
 
