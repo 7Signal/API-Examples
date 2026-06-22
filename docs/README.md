@@ -19,6 +19,8 @@ This directory contains the 7SIGNAL API reference documentation. The base URL fo
 | 11 | [Organizations, Groups, Roles](11-organizations-groups-roles.md) | Read-only endpoints for identity and access metadata |
 | 12 | [Integration Configs](12-integration-configs.md) | Meraki Cloud API integration configuration and scheduling |
 | 13 | [On-Demand Tests](13-on-demand-tests.md) | Ping, traceroute, HTTP/TCP/UDP throughput, speedtest, iPerf3, MOS, and web download tests |
+| 14 | [Impact](14-impact.md) | Agent and location impact metrics (experience score, connectivity, coverage, congestion, interference, roaming) |
+| 15 | [Scans](15-scans.md) | RF scan data collected by agents and sensors (detected APs, signal strength, channel, noise floor) |
 
 ## Migration Notes
 
