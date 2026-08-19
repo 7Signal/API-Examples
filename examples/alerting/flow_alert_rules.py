@@ -31,6 +31,16 @@ VALID_AGGREGATIONS = ["avg", "min", "max"]
 VALID_OPERATORS = ["<", "<=", ">", ">="]
 VALID_DIMENSIONS = ["device_id", "bssid", "network", "band", "location_id", "target"]
 
+JSON_CONTENT_TYPE = "application/json"
+
+
+def json_headers(token):
+    # Headers for the calls that send a JSON body.
+    return {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": JSON_CONTENT_TYPE,
+    }
+
 
 def list_alert_rules(token, page=1, per_page=10, metric=None, enabled=None, name=None):
     # Fetches a page of alert rules. Optional arguments filter the results.
@@ -129,10 +139,7 @@ def create_alert_rule(token, metric, dimension_set, aggregation_function,
         return None
 
     url = f"https://{API_HOST}/alerting/alert-rules"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = json_headers(token)
 
     payload = {
         "metric": metric,
@@ -180,10 +187,7 @@ def replace_alert_rule(token, rule_id, payload):
         return None
 
     url = f"https://{API_HOST}/alerting/alert-rules/{rule_id}"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = json_headers(token)
 
     try:
         response = requests.put(url, headers=headers, json=payload)
@@ -209,10 +213,7 @@ def set_alert_rule_enabled(token, rule_id, enabled):
         return None
 
     url = f"https://{API_HOST}/alerting/alert-rules/{rule_id}/enabled"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = json_headers(token)
 
     try:
         response = requests.patch(url, headers=headers, json={"enabled": enabled})
@@ -310,6 +311,152 @@ def display_alert_rule_summary(summary):
     logging.info(f"  Disabled : {summary.get('disabledCount', 'N/A')}")
 
 
+def prompt_for_rule_id():
+    # Asks for an alert rule id and exits when nothing is entered. Every action that
+    # works on a single rule starts here.
+    rule_id = input("Enter the ALERT RULE ID: ").strip()
+    if not rule_id:
+        logging.error("Alert rule id cannot be empty.")
+        sys.exit(1)
+
+    return rule_id
+
+
+def prompt_for_number(message):
+    # Asks for a numeric value and exits when it isn't one.
+    value = input(message).strip()
+    try:
+        return float(value)
+    except ValueError:
+        logging.error("Threshold must be a number.")
+        sys.exit(1)
+
+
+def prompt_for_new_rule():
+    # Collects and validates the fields needed to create a rule. Returns a dict of
+    # keyword arguments for create_alert_rule().
+    metric = input("Enter the METRIC name: ").strip()
+    if not metric:
+        logging.error("Metric cannot be empty.")
+        sys.exit(1)
+
+    logging.info(f"Available dimensions: {', '.join(VALID_DIMENSIONS)}")
+    dimensions_input = input("Enter one or more DIMENSIONS (comma separated): ").strip()
+    dimension_set = [d.strip() for d in dimensions_input.split(",") if d.strip()]
+    if not dimension_set:
+        logging.error("At least one dimension is required.")
+        sys.exit(1)
+
+    invalid = [d for d in dimension_set if d not in VALID_DIMENSIONS]
+    if invalid:
+        logging.error(f"Unsupported dimension(s): {', '.join(invalid)}")
+        logging.error(f"Valid values are: {', '.join(VALID_DIMENSIONS)}")
+        sys.exit(1)
+
+    aggregation = input(f"Enter the AGGREGATION ({'/'.join(VALID_AGGREGATIONS)}): ").strip().lower()
+    if aggregation not in VALID_AGGREGATIONS:
+        logging.error(f"Aggregation must be one of: {', '.join(VALID_AGGREGATIONS)}")
+        sys.exit(1)
+
+    operator = input(f"Enter the OPERATOR ({' '.join(VALID_OPERATORS)}): ").strip()
+    if operator not in VALID_OPERATORS:
+        logging.error(f"Operator must be one of: {' '.join(VALID_OPERATORS)}")
+        sys.exit(1)
+
+    threshold_value = prompt_for_number("Enter the THRESHOLD value: ")
+    name = input("Enter a NAME for the rule (optional): ").strip() or None
+
+    return {
+        "metric": metric,
+        "dimension_set": dimension_set,
+        "aggregation_function": aggregation,
+        "threshold_value": threshold_value,
+        "threshold_operator": operator,
+        "name": name,
+    }
+
+
+def action_fetch_rule(token):
+    # Fetches and displays a single rule.
+    rule = get_alert_rule(token, prompt_for_rule_id())
+    if rule:
+        display_alert_rules({"results": [rule]})
+
+
+def action_create_rule(token):
+    # Collects the rule fields, confirms, then creates it.
+    fields = prompt_for_new_rule()
+
+    if not confirm_action("Create this alert rule?"):
+        logging.info("Aborted; no alert rule was created.")
+        return
+
+    created = create_alert_rule(token, **fields)
+    if created:
+        display_alert_rules({"results": [created]})
+
+
+def action_toggle_rule(token):
+    # Enables or disables a rule without rewriting the rest of it.
+    rule_id = prompt_for_rule_id()
+
+    state_input = input("Enable or disable? (enable/disable): ").strip().lower()
+    if state_input not in ("enable", "disable"):
+        logging.error("Please answer 'enable' or 'disable'.")
+        sys.exit(1)
+
+    set_alert_rule_enabled(token, rule_id, state_input == "enable")
+
+
+def action_replace_threshold(token):
+    # Changes a rule's threshold through the full-replace endpoint.
+    rule_id = prompt_for_rule_id()
+
+    # Fetch first, because PUT is a full replace: anything left out of the
+    # payload reverts to its default rather than keeping its current value.
+    existing = get_alert_rule(token, rule_id)
+    if not existing:
+        return
+
+    new_threshold = prompt_for_number(
+        f"Enter the NEW THRESHOLD (currently {existing.get('thresholdValue')}): "
+    )
+
+    # Carry every field the API returned back into the replacement payload
+    payload = {
+        "metric": existing.get("metric"),
+        "dimensionSet": existing.get("dimensionSet"),
+        "aggregationFunction": existing.get("aggregationFunction"),
+        "thresholdValue": new_threshold,
+        "thresholdOperator": existing.get("thresholdOperator"),
+    }
+    for field in ("name", "dimensionFilters", "pendingPeriodSeconds",
+                  "missingDataPolicy", "notificationConfig", "locationSelection",
+                  "enabled"):
+        if existing.get(field) is not None:
+            payload[field] = existing[field]
+
+    updated = replace_alert_rule(token, rule_id, payload)
+    if updated:
+        display_alert_rules({"results": [updated]})
+
+
+def action_delete_rule(token):
+    # Deletes a rule after confirming.
+    delete_alert_rule(token, prompt_for_rule_id())
+
+
+# The menu, in order. Each entry pairs the label shown to the user with the function
+# that carries the action out.
+MENU_ACTIONS = [
+    ("Fetch a single alert rule", action_fetch_rule),
+    ("Create a new alert rule", action_create_rule),
+    ("Enable or disable an alert rule", action_toggle_rule),
+    ("Change an alert rule's threshold (full replace)", action_replace_threshold),
+    ("Delete an alert rule", action_delete_rule),
+]
+
+
 def main():
     # Step 1: Authenticate and get a bearer token
     token, _ = get_token()
@@ -323,138 +470,16 @@ def main():
 
     # Step 3: Offer the lifecycle actions
     logging.info("What would you like to do?")
-    logging.info("  1) Fetch a single alert rule")
-    logging.info("  2) Create a new alert rule")
-    logging.info("  3) Enable or disable an alert rule")
-    logging.info("  4) Change an alert rule's threshold (full replace)")
-    logging.info("  5) Delete an alert rule")
-    logging.info("  6) Exit")
+    for number, (label, _action) in enumerate(MENU_ACTIONS, start=1):
+        logging.info(f"  {number}) {label}")
+    exit_choice = len(MENU_ACTIONS) + 1
+    logging.info(f"  {exit_choice}) Exit")
 
-    choice = input("Enter a number (1-6): ").strip()
+    choice = input(f"Enter a number (1-{exit_choice}): ").strip()
 
-    if choice == "1":
-        rule_id = input("Enter the ALERT RULE ID: ").strip()
-        if not rule_id:
-            logging.error("Alert rule id cannot be empty.")
-            sys.exit(1)
-
-        rule = get_alert_rule(token, rule_id)
-        if rule:
-            display_alert_rules({"results": [rule]})
-
-    elif choice == "2":
-        metric = input("Enter the METRIC name: ").strip()
-        if not metric:
-            logging.error("Metric cannot be empty.")
-            sys.exit(1)
-
-        logging.info(f"Available dimensions: {', '.join(VALID_DIMENSIONS)}")
-        dimensions_input = input("Enter one or more DIMENSIONS (comma separated): ").strip()
-        dimension_set = [d.strip() for d in dimensions_input.split(",") if d.strip()]
-        if not dimension_set:
-            logging.error("At least one dimension is required.")
-            sys.exit(1)
-
-        invalid = [d for d in dimension_set if d not in VALID_DIMENSIONS]
-        if invalid:
-            logging.error(f"Unsupported dimension(s): {', '.join(invalid)}")
-            logging.error(f"Valid values are: {', '.join(VALID_DIMENSIONS)}")
-            sys.exit(1)
-
-        aggregation = input(f"Enter the AGGREGATION ({'/'.join(VALID_AGGREGATIONS)}): ").strip().lower()
-        if aggregation not in VALID_AGGREGATIONS:
-            logging.error(f"Aggregation must be one of: {', '.join(VALID_AGGREGATIONS)}")
-            sys.exit(1)
-
-        operator = input(f"Enter the OPERATOR ({' '.join(VALID_OPERATORS)}): ").strip()
-        if operator not in VALID_OPERATORS:
-            logging.error(f"Operator must be one of: {' '.join(VALID_OPERATORS)}")
-            sys.exit(1)
-
-        threshold_input = input("Enter the THRESHOLD value: ").strip()
-        try:
-            threshold_value = float(threshold_input)
-        except ValueError:
-            logging.error("Threshold must be a number.")
-            sys.exit(1)
-
-        name = input("Enter a NAME for the rule (optional): ").strip() or None
-
-        if not confirm_action("Create this alert rule?"):
-            logging.info("Aborted; no alert rule was created.")
-            return
-
-        created = create_alert_rule(
-            token,
-            metric=metric,
-            dimension_set=dimension_set,
-            aggregation_function=aggregation,
-            threshold_value=threshold_value,
-            threshold_operator=operator,
-            name=name,
-        )
-        if created:
-            display_alert_rules({"results": [created]})
-
-    elif choice == "3":
-        rule_id = input("Enter the ALERT RULE ID: ").strip()
-        if not rule_id:
-            logging.error("Alert rule id cannot be empty.")
-            sys.exit(1)
-
-        state_input = input("Enable or disable? (enable/disable): ").strip().lower()
-        if state_input not in ("enable", "disable"):
-            logging.error("Please answer 'enable' or 'disable'.")
-            sys.exit(1)
-
-        set_alert_rule_enabled(token, rule_id, state_input == "enable")
-
-    elif choice == "4":
-        rule_id = input("Enter the ALERT RULE ID: ").strip()
-        if not rule_id:
-            logging.error("Alert rule id cannot be empty.")
-            sys.exit(1)
-
-        # Fetch first, because PUT is a full replace: anything left out of the
-        # payload reverts to its default rather than keeping its current value.
-        existing = get_alert_rule(token, rule_id)
-        if not existing:
-            return
-
-        threshold_input = input(f"Enter the NEW THRESHOLD "
-                                f"(currently {existing.get('thresholdValue')}): ").strip()
-        try:
-            new_threshold = float(threshold_input)
-        except ValueError:
-            logging.error("Threshold must be a number.")
-            sys.exit(1)
-
-        # Carry every field the API returned back into the replacement payload
-        payload = {
-            "metric": existing.get("metric"),
-            "dimensionSet": existing.get("dimensionSet"),
-            "aggregationFunction": existing.get("aggregationFunction"),
-            "thresholdValue": new_threshold,
-            "thresholdOperator": existing.get("thresholdOperator"),
-        }
-        for field in ("name", "dimensionFilters", "pendingPeriodSeconds",
-                      "missingDataPolicy", "notificationConfig", "locationSelection",
-                      "enabled"):
-            if existing.get(field) is not None:
-                payload[field] = existing[field]
-
-        updated = replace_alert_rule(token, rule_id, payload)
-        if updated:
-            display_alert_rules({"results": [updated]})
-
-    elif choice == "5":
-        rule_id = input("Enter the ALERT RULE ID: ").strip()
-        if not rule_id:
-            logging.error("Alert rule id cannot be empty.")
-            sys.exit(1)
-
-        delete_alert_rule(token, rule_id)
-
+    # Step 4: Run the chosen action
+    if choice.isdigit() and 1 <= int(choice) <= len(MENU_ACTIONS):
+        MENU_ACTIONS[int(choice) - 1][1](token)
     else:
         logging.info("Nothing to do.")
 
