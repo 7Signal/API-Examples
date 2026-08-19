@@ -35,25 +35,43 @@ When creating or modifying examples, remember that **many users may not be exper
 
 ```
 API-Examples/
-├── README.md                  # User-facing setup and usage instructions
-├── auth_utils.py             # Shared authentication module (OAuth2)
-├── examples/                 # All example scripts organized by category
-│   ├── access_points/        # Access point and agent interactions
-│   ├── api_keys/            # API key management and retrieval
-│   ├── authentication/      # Authentication examples
-│   ├── eyes/                # Eyes Agents (licensing, sensors, CSV ops)
-│   ├── groups/              # Group management
-│   ├── kpi/                 # KPI endpoint examples
-│   ├── networks/            # Network operations
-│   ├── organization/        # Organization management
-│   ├── on_demand_test/      # Requesting an on-demand test and polling for the results
-│   ├── rate_limiting/       # Rate limit handling utilities
-│   ├── roles/               # Role management
-│   ├── time_series/         # Time series data and SLA reports
-│   ├── topologies/          # Topology operations
-│   └── user_management/     # User CRUD operations
-├── tests/                   # Test files (mirrors examples structure)
-└── venv/                    # Python virtual environment
+├── README.md                      # User-facing setup and usage instructions
+├── DEVELOPER_GUIDE.md             # This file: conventions for writing examples
+├── auth_utils.py                  # Shared authentication module (OAuth2)
+├── docs/                          # API reference documentation (see docs/README.md)
+│   ├── 01-authentication.md ...   # Numbered reference chapters
+│   ├── WHATS-NEW.md               # Recently documented endpoints + OpenAPI version reviewed
+│   └── migration/                 # Deprecated endpoints and their replacements
+├── examples/                      # All example scripts organized by category
+│   ├── access_points/             # Access point and agent interactions
+│   ├── alerting/                  # Alert rules and alert incidents
+│   ├── api_keys/                  # API key management and retrieval
+│   ├── audits/                    # Agent audit trail
+│   ├── authentication/            # Authentication examples
+│   ├── change_events/             # Sensor-side configuration change events
+│   ├── clients/                   # Client devices observed by sensors
+│   ├── default_configurations/    # Sensor default configuration bundles (read-only)
+│   ├── eyeris/                    # Eyeris AI analysis (polling and streaming)
+│   ├── eyes/                      # Eyes Agents (licensing, sensors, CSV ops, automated testing)
+│   ├── groups/                    # Group management
+│   ├── impact/                    # Agent and location impact metrics
+│   ├── incidents/                 # Platform-detected agent incidents
+│   ├── kpi/                       # KPI endpoint examples
+│   ├── network_keys/              # Sensor network keys (WPA/EAP/captive portal)
+│   ├── networks/                  # Network operations
+│   ├── on_demand_tests/           # Requesting on-demand tests and polling for results
+│   ├── organization/              # Organization management
+│   ├── rate_limiting/             # Rate limit handling utilities
+│   ├── roles/                     # Role management
+│   ├── scans/                     # RF scan data from agents and sensors
+│   ├── service_areas/             # Agent service areas (bulk and single operations)
+│   ├── summaries/                 # User summary counts
+│   ├── targets/                   # Sensor test targets
+│   ├── time_series/               # Time series data and SLA reports
+│   ├── topologies/                # Topology operations
+│   └── user_management/           # User CRUD operations
+├── tests/                         # Test files (mirrors examples structure)
+└── venv/                          # Python virtual environment
 ```
 
 ## Core Components
@@ -427,6 +445,47 @@ pip install matplotlib  # Only for visualization examples
 
 The `tests/` directory mirrors the `examples/` structure, with test files for each category. Tests validate API interactions and error handling.
 
+### Running the tests
+
+`auth_utils.py` raises `EnvironmentError` at **import** time when its credentials are missing, so the environment variables must be set even for tests that never make a real call. Any placeholder value works:
+
+```bash
+API_KEY=fake API_SECRET=fake pytest tests/ -v
+```
+
+To check coverage on the example scripts:
+
+```bash
+API_KEY=fake API_SECRET=fake pytest tests/ --cov=examples --cov-report=term-missing
+```
+
+### What a test file covers
+
+Tests never make real HTTP calls — patch `requests` with `unittest.mock` instead. Each example's test file typically covers:
+
+1. The expected functions exist
+2. The success path for each API call, asserting the request was built correctly (URL, params, body)
+3. Error handling — a `404` returning `None` rather than raising, and any documented `409`
+4. Input validation that happens before a request is sent
+5. The display helper, including partial data and an empty result set
+
+### Destructive operations
+
+Where an example can change or remove live configuration, it must confirm before sending. Two placements are in use, and which one you pick decides how the test is written:
+
+- **Inside the function** — for operations whose danger is inherent to the call: `DELETE`, a `PUT` that fully replaces, disabling an alert rule, stopping automated testing. Callers importing the function get the guard for free. These return a falsy value (`False`, or `None` where the success path returns an object) when the user declines.
+- **In `main()`** — for operations where the prompt needs context the function doesn't have, such as echoing the assembled payload back before creating something.
+
+Test both branches — that a declined prompt issues **no** request, and that a confirmed one does:
+
+```python
+@patch("examples.targets.flow_targets_sensors.requests.delete")
+@patch("builtins.input", return_value="no")
+def test_delete_aborts_without_confirmation(mock_input, mock_delete):
+    assert flow_targets_sensors.delete_target("fake-token", 412) is False
+    mock_delete.assert_not_called()
+```
+
 ## Common Pitfalls to Avoid
 
 1. **Don't fetch token in loops** - Get once at start, reuse
@@ -449,6 +508,8 @@ When creating a new example script:
 7. Test with both success and failure cases
 8. Document any special requirements (roles, permissions)
 9. Add usage example in script header if it takes arguments
+10. Prompt for confirmation before any call that changes or removes live configuration, and say in the header what the change affects
+11. Validate enum values and required-field combinations before sending, so the user gets a clear message instead of a `400`
 
 ## Example Script Templates
 
