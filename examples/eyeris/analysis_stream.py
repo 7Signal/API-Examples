@@ -28,6 +28,10 @@ API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 # The specification puts no fixed list on promptTypeKey, so these are the keys known to
 # work rather than the only ones accepted. Anything else is passed through with a warning.
+#
+# This is deliberately laxer than client_analysis.py, which rejects an unknown `type`
+# outright: there, the specification does define an enum, so an unlisted value is known
+# to be invalid. Here it isn't, so refusing one would block input the API may accept.
 KNOWN_PROMPT_TYPES = ["ROAMING", "CONGESTION", "COVERAGE", "INTERFERENCE"]
 
 # Server-Sent Events prefix each payload line with this marker

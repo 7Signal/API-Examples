@@ -48,6 +48,10 @@ SECRET_FIELDS = [
 
 def list_network_keys(token, page=1, per_page=10):
     # Fetches a page of sensor network keys.
+    # Note: the OpenAPI specification declares no query parameters for this endpoint,
+    # even though the response carries a pagination object. Paging is sent here because
+    # that envelope implies support, but it is unconfirmed - check pagination.page in the
+    # response before relying on a paging loop.
     url = f"https://{API_HOST}/network-keys/sensors"
     headers = {"Authorization": f"Bearer {token}"}
     params = {"page": page, "perPage": per_page}

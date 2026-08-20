@@ -388,3 +388,29 @@ def test_main_resolve_branch():
 # Test that the resolve branch forwards a supplied id
 def test_main_resolve_branch_with_id():
     run_main(["5", SAMPLE_INCIDENT["id"]], resolve_incident=True)
+
+
+# Test that an unrecognised status filter is refused before any request. An
+# unrecognised query parameter value is ignored by the API rather than rejected, so
+# sending "Active" would return every incident while looking like a filtered result.
+@patch("examples.alerting.alert_incidents.requests.get")
+def test_list_incidents_rejects_bad_status(mock_get, caplog):
+    with caplog.at_level("ERROR"):
+        result = alert_incidents.list_incidents("fake-token", status="Active")
+
+    assert result is None
+    mock_get.assert_not_called()
+    assert "lowercase" in caplog.text
+
+
+# Test that both documented status values are accepted
+@patch("examples.alerting.alert_incidents.requests.get")
+def test_list_incidents_accepts_valid_statuses(mock_get):
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = SAMPLE_LIST
+    mock_response.raise_for_status = MagicMock()
+    mock_get.return_value = mock_response
+
+    for status in alert_incidents.VALID_STATUSES:
+        assert alert_incidents.list_incidents("fake-token", status=status) is not None

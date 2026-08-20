@@ -30,6 +30,10 @@ logging.basicConfig(
 API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 
 # Unlike the alerting endpoints, these enum values must be UPPERCASE.
+#
+# The specification defines this as a closed enum, so an unlisted value is rejected
+# outright below. The streaming endpoint's promptTypeKey has no enum in the
+# specification, so analysis_stream.py warns and sends instead of refusing.
 VALID_ANALYSIS_TYPES = ["ROAMING", "CONGESTION", "COVERAGE", "INTERFERENCE"]
 
 # How long to wait between polls, and how many times to try before giving up

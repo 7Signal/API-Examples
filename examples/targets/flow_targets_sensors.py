@@ -35,6 +35,10 @@ TYPES_ACCEPTING_ANY_ADDRESS = ["SONAR", "PING_ENDPOINT"]
 
 def list_targets(token, page=1, per_page=10):
     # Fetches a page of sensor targets.
+    # Note: the OpenAPI specification declares no query parameters for this endpoint,
+    # even though the response carries a pagination object. Paging is sent here because
+    # that envelope implies support, but it is unconfirmed - check pagination.page in the
+    # response before relying on a paging loop.
     url = f"https://{API_HOST}/targets/sensors"
     headers = {"Authorization": f"Bearer {token}"}
     params = {"page": page, "perPage": per_page}
@@ -138,7 +142,13 @@ def create_target(token, target_type, name, description=None, dns_name=None,
 
 def replace_target(token, target_id, payload):
     # Replaces a sensor target. dnsName, ipV4Address, and ipV6Address fully replace
-    # their previous values, so any address field left out of the payload is cleared.
+    # their previous values, so any address field left out of the payload is cleared -
+    # confirm before sending, so callers importing this function get the guard too.
+    if not confirm_action(f"Replace sensor target {target_id}? Any address field left "
+                          "out of the payload will be cleared."):
+        logging.info("Aborted; the sensor target was not changed.")
+        return None
+
     url = f"https://{API_HOST}/targets/sensors/{target_id}"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -318,10 +328,7 @@ def main():
             if existing.get(field) is not None:
                 payload[field] = existing[field]
 
-        if not confirm_action(f"Rename target {target_id} to '{new_name}'?"):
-            logging.info("Aborted; the target was not changed.")
-            return
-
+        # replace_target() prompts for confirmation itself
         updated = replace_target(token, target_id, payload)
         if updated:
             display_targets({"results": [updated]})

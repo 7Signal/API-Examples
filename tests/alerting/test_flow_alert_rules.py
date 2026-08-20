@@ -564,3 +564,34 @@ def test_main_replace_branch_bad_threshold(mock_input, mock_get, mock_summary,
 def test_main_replace_branch_empty_id(mock_input, mock_summary, mock_list, mock_token):
     with pytest.raises(SystemExit):
         flow_alert_rules.main()
+
+
+# Test that a zero-padded menu entry does not dispatch an action. Matching on
+# int(choice) would treat "01" as "1" and run a destructive path the user did not pick.
+@patch("examples.alerting.flow_alert_rules.get_token", return_value=("tok", 0))
+@patch("examples.alerting.flow_alert_rules.list_alert_rules", return_value=SAMPLE_LIST)
+@patch("examples.alerting.flow_alert_rules.get_alert_rules_summary", return_value={})
+@patch("examples.alerting.flow_alert_rules.get_alert_rule")
+@patch("builtins.input", side_effect=["01"])
+def test_main_rejects_zero_padded_choice(mock_input, mock_get, mock_summary,
+                                         mock_list, mock_token, caplog):
+    with caplog.at_level("INFO"):
+        flow_alert_rules.main()
+
+    mock_get.assert_not_called()
+    assert "Nothing to do" in caplog.text
+
+
+# Test that other near-miss inputs also fall through rather than dispatching
+@patch("examples.alerting.flow_alert_rules.get_token", return_value=("tok", 0))
+@patch("examples.alerting.flow_alert_rules.list_alert_rules", return_value=SAMPLE_LIST)
+@patch("examples.alerting.flow_alert_rules.get_alert_rules_summary", return_value={})
+@patch("examples.alerting.flow_alert_rules.delete_alert_rule")
+@patch("builtins.input", side_effect=["+5"])
+def test_main_rejects_signed_choice(mock_input, mock_delete, mock_summary,
+                                    mock_list, mock_token, caplog):
+    with caplog.at_level("INFO"):
+        flow_alert_rules.main()
+
+    mock_delete.assert_not_called()
+    assert "Nothing to do" in caplog.text

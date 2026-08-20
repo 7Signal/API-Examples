@@ -131,9 +131,10 @@ def test_delete_target_deletes_when_confirmed(mock_input, mock_delete):
     mock_delete.assert_called_once()
 
 
-# Test that replace_target warns that omitted address fields are cleared
+# Test that a confirmed replace is sent
+@patch("builtins.input", return_value="yes")
 @patch("examples.targets.flow_targets_sensors.requests.put")
-def test_replace_target_success(mock_put):
+def test_replace_target_success(mock_put, mock_input):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = SAMPLE_TARGET
@@ -252,10 +253,20 @@ def test_create_target_http_error(mock_post):
 
 
 # Test that an HTTP error on replace returns None
+@patch("builtins.input", return_value="yes")
 @patch("examples.targets.flow_targets_sensors.requests.put")
-def test_replace_target_http_error(mock_put):
+def test_replace_target_http_error(mock_put, mock_input):
     mock_put.return_value = http_error_response()
     assert flow_targets_sensors.replace_target("fake-token", 1, {"name": "n"}) is None
+
+
+# Test that declining the replace confirmation sends nothing. The guard lives in the
+# function so callers importing it directly are covered too.
+@patch("builtins.input", return_value="no")
+@patch("examples.targets.flow_targets_sensors.requests.put")
+def test_replace_target_declined(mock_put, mock_input):
+    assert flow_targets_sensors.replace_target("fake-token", 1, {"name": "n"}) is None
+    mock_put.assert_not_called()
 
 
 # Test that a delete blocked by a test profile is explained

@@ -143,11 +143,13 @@ def display_incidents(data):
         if incident.get("timestampDeterminedToBeIncident"):
             logging.info(f"  Qualified    : {incident.get('timestampDeterminedToBeIncident')}")
 
-        # An incident still in progress has no meaningful end timestamp
+        # The API defines no active/resolved flag for agent incidents and does not
+        # declare endTimestamp nullable, so an absent value is reported as absent
+        # rather than being interpreted as "still running".
         if incident.get("endTimestamp"):
             logging.info(f"  Ended        : {incident.get('endTimestamp')}")
         else:
-            logging.info("  Ended        : still in progress")
+            logging.info("  Ended        : not reported")
 
         critical = get_threshold(incident, "criticalThreshold")
         warning = get_threshold(incident, "warningThreshold")

@@ -32,6 +32,15 @@ VALID_STATUSES = ["active", "resolved"]
 def list_incidents(token, status=None, metric=None, rule_id=None,
                    started_after=None, started_before=None, page=1, per_page=10):
     # Fetches a page of alert incidents. Optional arguments filter the results.
+    #
+    # The status value is checked here because an unrecognised query parameter value is
+    # ignored rather than rejected: "Active" instead of "active" would quietly return
+    # every incident while looking like a filtered result.
+    if status is not None and status not in VALID_STATUSES:
+        logging.error(f"Unsupported status filter: {status}")
+        logging.error(f"Valid values are: {', '.join(VALID_STATUSES)} (lowercase)")
+        return None
+
     url = f"https://{API_HOST}/alerting/incidents"
     headers = {"Authorization": f"Bearer {token}"}
 

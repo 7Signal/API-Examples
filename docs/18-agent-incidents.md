@@ -147,7 +147,18 @@ def get_threshold(incident, name):
 | `asOfTimestamp` | When the record was last evaluated |
 
 `timestampDeterminedToBeIncident` is always later than `startTimestamp` — the gap is roughly
-`minIncidentDurationMinutes`. An incident still in progress has no meaningful `endTimestamp`.
+`minIncidentDurationMinutes`.
+
+**How to tell whether an incident is still ongoing is not settled.** The specification types all four
+timestamps as plain `date-time`, does not mark `endTimestamp` nullable, and defines no explicit
+active/resolved flag on an agent incident — unlike
+[alert incidents](16-alerting.md), which carry `resolvedAt` and `resolutionReason`. So there is no
+documented way to distinguish "recovered at this time" from "not recovered yet."
+
+Treat it defensively: check whether `endTimestamp` is absent or empty before relying on it, and don't
+read a populated value as proof the incident has closed. If you need this distinction to be reliable,
+confirm the intended semantics with the API team first — this is an open question, not a documented
+behaviour.
 
 **Judging severity** uses two numbers together: `countImpacted` against `populationCount`. Twelve
 impacted devices out of 84 is a different problem from twelve out of thirteen. The
@@ -194,6 +205,13 @@ object instead of a `pagination` object. Narrow `from`/`to` or `location_id` to 
 
 A: That's normal. `endTimestamp` is when the degradation recovered; `asOfTimestamp` is when the record
 was last evaluated, which continues past recovery. They're measuring different things.
+
+**Q: How do I tell whether an incident is still open?**
+
+A: The specification doesn't say. There's no active/resolved flag on an agent incident, and
+`endTimestamp` isn't declared nullable, so a populated value can't be read as proof the incident closed.
+Check for an absent or empty `endTimestamp` defensively and confirm the intended semantics with the API
+team before depending on it. See "Interpreting the timestamps" above.
 
 **Q: How do these relate to the alert incidents under `/alerting/incidents`?**
 

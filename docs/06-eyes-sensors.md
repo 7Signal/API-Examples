@@ -208,8 +208,8 @@ actually reached `RUNNING` or `STOPPED`.
 
 - There is no way to delete sensors via an endpoint. Use the Configurator app to remove sensors.
 - Pagination for the Eyes endpoints starts at page 1.
-- Automated testing and on-demand tests are mutually exclusive on a sensor. If an on-demand test is not
-  starting, check `GET /eyes/sensors/{sensorId}/automated-testing` — a `testStatus` of `RUNNING` is the
-  usual reason.
+- Automated testing and on-demand tests are mutually exclusive on a sensor. If an on-demand test cannot
+  be started, it is likely that automated testing is enabled. Check
+  `GET /eyes/sensors/{sensorId}/automated-testing` to see whether `testStatus` is `RUNNING`.
 - `POST .../automated-testing` returns as soon as the action is accepted. Poll the `GET` to confirm the
   sensor reached the state you asked for; `STOPPING` means it is still winding down.

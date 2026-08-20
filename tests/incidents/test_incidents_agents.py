@@ -224,14 +224,17 @@ def test_list_incidents_forwards_window_and_order(mock_get):
     assert params["order"] == "desc"
 
 
-# Test that an in-progress incident is labelled rather than showing a blank end time
-def test_display_incidents_in_progress(caplog):
+# Test that an absent end timestamp is reported as absent rather than being
+# interpreted as "still running" - the API defines no active/resolved flag for
+# agent incidents, so inferring one would be inventing semantics
+def test_display_incidents_missing_end_timestamp(caplog):
     ongoing = {"results": [dict(NESTED_INCIDENT, endTimestamp=None)]}
 
     with caplog.at_level("INFO"):
         incidents_agents.display_incidents(ongoing)
 
-    assert "still in progress" in caplog.text
+    assert "not reported" in caplog.text
+    assert "still in progress" not in caplog.text
 
 
 # Test that impact is reported without a population count

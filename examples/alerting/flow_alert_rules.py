@@ -478,8 +478,15 @@ def main():
     choice = input(f"Enter a number (1-{exit_choice}): ").strip()
 
     # Step 4: Run the chosen action
-    if choice.isdigit() and 1 <= int(choice) <= len(MENU_ACTIONS):
-        MENU_ACTIONS[int(choice) - 1][1](token)
+    # Match the entered text exactly. Comparing int(choice) instead would accept
+    # padded input like "01" and run a destructive action the user did not pick.
+    actions_by_choice = {
+        str(number): action
+        for number, (_label, action) in enumerate(MENU_ACTIONS, start=1)
+    }
+
+    if choice in actions_by_choice:
+        actions_by_choice[choice](token)
     else:
         logging.info("Nothing to do.")
 
