@@ -3,7 +3,7 @@
 Newly documented 7SIGNAL API endpoints, with links to their reference pages and the
 example scripts.
 
-This release adds **29 new endpoints** across 13 areas of the API.
+This release adds **16 new endpoints** across 2 areas of the API.
 
 ---
 
