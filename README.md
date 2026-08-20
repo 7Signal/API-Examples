@@ -79,6 +79,31 @@ Time Series Endpoint
     Enter to_time timestamp (milliseconds): "your-current-epoch-time-in-milliseconds"
 
 
+Alerting Endpoints
+
+    Enter the ALERT RULE ID: "your-alert-rule-uuid"
+    Enter the INCIDENT ID: "your-incident-uuid"
+
+
+Eyeris Endpoints
+
+    Enter the AGENT ID (UUID): "your-agent-id"
+    Enter the ANALYSIS TYPE: "ROAMING, CONGESTION, COVERAGE, or INTERFERENCE"
+
+
+Sensor Configuration Endpoints
+
+    Enter the TARGET ID (a number): "your-sensor-target-id"
+    Enter the NETWORK KEY ID (a number): "your-network-key-id"
+    Enter the SERVICE AREA ID (UUID): "your-service-area-id"
+
+
+On-Demand Test Metadata
+
+    Enter the SENSOR ID: "your-sensor-id"
+    Enter the TEST TYPE: "SPEEDTEST, PING, TRACEROUTE, ..."
+
+
 Getting current epoch time using Python:
 
     import time
@@ -136,3 +161,28 @@ ex: Topologies
 
     cd topologies
     python topologyAgents.py
+
+
+ex: Alerting - Alert Rules
+
+
+    cd examples/alerting
+    python flow_alert_rules.py
+
+
+ex: Eyeris - Client Analysis
+
+
+    cd examples/eyeris
+    python client_analysis.py
+
+
+## API Documentation
+
+Reference documentation for the endpoints these examples call is in the [docs](docs/README.md)
+directory. See [What's New](docs/WHATS-NEW.md) for recently documented endpoints.
+
+> **Note:** Some examples change live configuration — creating or deleting alert rules,
+> sensor targets, and network keys, or stopping automated testing on a sensor. Those
+> scripts ask you to type `yes` before sending anything. Read the prompt before
+> confirming, and prefer a non-production organization while you are learning.

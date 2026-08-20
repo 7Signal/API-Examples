@@ -21,6 +21,19 @@ This directory contains the 7SIGNAL API reference documentation. The base URL fo
 | 13 | [On-Demand Tests](13-on-demand-tests.md) | Ping, traceroute, HTTP/TCP/UDP throughput, speedtest, iPerf3, MOS, and web download tests |
 | 14 | [Impact](14-impact.md) | Agent and location impact metrics (experience score, connectivity, coverage, congestion, interference, roaming) |
 | 15 | [Scans](15-scans.md) | RF scan data collected by agents and sensors (detected APs, signal strength, channel, noise floor) |
+| 16 | [Alerting](16-alerting.md) | Alert rules and the incidents they raise — thresholds, dimensions, notifications, resolution |
+| 17 | [Eyeris Analysis](17-eyeris-analysis.md) | AI-generated analysis of an agent's experience, by polling or Server-Sent Events |
+| 18 | [Agent Incidents](18-agent-incidents.md) | Platform-detected incidents where a share of the agent population degraded together |
+| 19 | [Sensor Targets, Network Keys & Default Configurations](19-sensor-targets-and-network-keys.md) | What sensors test toward, the credentials they connect with, and the bundles tying them together |
+| 20 | [Agent Service Areas](20-agent-service-areas.md) | Sub-divisions of a location, with bulk and single-record operations |
+| 21 | [Sensor Clients & Change Events](21-sensor-clients-and-change-events.md) | Client devices sensors observed, and configuration changes on sensor-side elements |
+| 22 | [Agent Audit & User Summaries](22-audit-and-user-summaries.md) | The agent audit trail, and user totals with recent-login counts |
+
+## What's New
+
+| Document | Description |
+|----------|-------------|
+| [What's New](WHATS-NEW.md) | Recently added endpoints, grouped by capability, with links to their reference pages and examples |
 
 ## Migration Notes
 

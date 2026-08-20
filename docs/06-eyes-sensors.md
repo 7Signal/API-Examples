@@ -136,7 +136,80 @@ Registers a sensor and enables it to start monitoring. There won't be a sensor i
 }
 ```
 
+### `GET /eyes/sensors/{sensorId}/automated-testing`
+
+Returns the current automated-testing state of a sensor — what it is running, against which access point,
+and where it is in its test profile.
+
+This is the endpoint to check when an on-demand test appears stuck: on-demand tests do not start while
+automated testing is actively running on the sensor.
+
+**Required parameters:** `sensorId` (integer, in path)
+
+**Response:**
+
+```json
+{
+  "eyeName": "Eye-Cleveland-03",
+  "testProfileName": "Standard Branch",
+  "testStatus": "RUNNING",
+  "currentTestStatus": "Test started",
+  "currentAccessPoint": "AP-CLE-3-North",
+  "currentTestRunning": "SPEEDTEST"
+}
+```
+
+| **Field** | **Type** | **Description** |
+| --- | --- | --- |
+| `eyeName` | string | Name of the sensor |
+| `testProfileName` | string | Test profile currently applied |
+| `testStatus` | string | `STOPPED`, `PAUSED`, `RUNNING`, `STOPPING`, or `UNKNOWN` |
+| `currentTestStatus` | string | Free-text progress message, e.g. `"Test started"` |
+| `currentAccessPoint` | string | Access point being tested against right now |
+| `currentTestRunning` | string | The test type currently executing |
+
+Note `STOPPING` is a transient state — a stop has been requested but the sensor has not finished winding
+down. Poll until it reaches `STOPPED` rather than assuming the stop took effect immediately.
+
+### `POST /eyes/sensors/{sensorId}/automated-testing`
+
+Starts or stops automated testing on a sensor.
+
+**Required parameters:** `sensorId` (integer, in path)
+
+**Request:**
+
+```json
+{
+  "action": "START_AUTOMATED_TESTING"
+}
+```
+
+`action` must be exactly `START_AUTOMATED_TESTING` or `STOP_AUTOMATED_TESTING`.
+
+**Response:**
+
+```json
+{
+  "action": "START_AUTOMATED_TESTING",
+  "result": "SUCCESS"
+}
+```
+
+> **This changes live monitoring behaviour.** Stopping automated testing halts the scheduled measurements
+> that KPIs, SLAs, and alerting are calculated from — gaps will appear in the data for as long as it stays
+> stopped. Prompt for confirmation before sending this from a script, and remember to start it again.
+
+The `result` field reports whether the request was accepted, not whether the sensor has finished
+transitioning. Follow up with `GET .../automated-testing` and check `testStatus` to confirm the sensor
+actually reached `RUNNING` or `STOPPED`.
+
 ## 3. Developer Tips
 
-- There is no way to delete sensors via an endpoint. Contact 7SIGNAL support to remove sensors.
+- There is no way to delete sensors via an endpoint. Use the Configurator app to remove sensors.
 - Pagination for the Eyes endpoints starts at page 1.
+- Automated testing and on-demand tests are mutually exclusive on a sensor. If an on-demand test cannot
+  be started, it is likely that automated testing is enabled. Check
+  `GET /eyes/sensors/{sensorId}/automated-testing` to see whether `testStatus` is `RUNNING`.
+- `POST .../automated-testing` returns as soon as the action is accepted. Poll the `GET` to confirm the
+  sensor reached the state you asked for; `STOPPING` means it is still winding down.

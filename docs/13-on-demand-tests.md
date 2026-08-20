@@ -440,7 +440,88 @@ Downloads one or more web pages and measures page load performance.
 
 ---
 
-## 5. Developer Tips
+## 5. Listing Active Tests
+
+### `GET /on-demand-tests/sensors/active-tests`
+
+Returns metadata for on-demand tests already submitted on a sensor, so you can see what is queued or
+running before submitting another. Tests do not start while an automated test is running on the sensor, so
+this is the endpoint to check when a test appears to be doing nothing.
+
+**Required parameters:** `sensorId` **and** `testType` — unlike the other endpoints on this page, both are
+mandatory query parameters. You cannot list active tests across all sensors or all test types in one call.
+
+**Optional parameters:** `channel`, `apId`, `band`, `start`, `end`, `page`, `size`
+
+| **Parameter** | **Type** | **Description** |
+| --- | --- | --- |
+| `sensorId` | integer | **Required.** The sensor to list tests for |
+| `testType` | string | **Required.** One of `PING`, `HTTP_DOWNLOAD`, `HTTP_UPLOAD`, `IPERF3`, `SPEEDTEST`, `TRACEROUTE`, `MOS`, `UDP_DOWNLOAD`, `UDP_UPLOAD`, `TCP_DOWNLOAD`, `TCP_UPLOAD`, `WEB_DOWNLOAD` |
+| `channel` | integer | Filter by Wi-Fi channel number |
+| `apId` | integer | Filter by access point ID |
+| `band` | string | `2.4`, `5`, `6`, or `all` |
+| `start` | integer | Start of time range (epoch milliseconds) |
+| `end` | integer | End of time range (epoch milliseconds) |
+| `page` | integer | **Zero-based** page number (default `0`) |
+| `size` | integer | Page size (default `20`) |
+
+> **Pagination differs from the rest of this API.** This endpoint uses **0-based** `page` numbering and a
+> `size` parameter, and the results array is named `items` rather than `results`. Most other endpoints use
+> 1-based `page` with `perPage` and a `results` array.
+
+**Response:**
+
+```json
+{
+  "pagination": {
+    "perPage": 20,
+    "page": 0,
+    "total": 3,
+    "pages": 1
+  },
+  "items": [
+    {
+      "id": "f0c8a3d1-6b74-4e29-9a5c-31d7b8e05f62",
+      "testKey": "5c9a1e84-2f70-4b3d-8e16-7a0c4d9b2f58",
+      "testId": 884213,
+      "testType": "SPEEDTEST",
+      "sensorId": 1042,
+      "sensorUuid": "9d3f7c20-8a15-4e62-b7d9-40c1e6a85b73",
+      "sensorName": "Eye-Cleveland-03",
+      "orgUuid": "2b7e4a90-1c58-4d37-8f26-93a0c5e71d84",
+      "apId": 5517,
+      "band": "5",
+      "channel": 36,
+      "gid": 12,
+      "resultsFileS3Key": "results/884213.json",
+      "runStatus": "IN_PROGRESS",
+      "errorCode": 0,
+      "errorMessage": null,
+      "testStatus": null,
+      "createdAt": "2026-08-18T13:04:11Z",
+      "hostname": "eye-cle-03"
+    }
+  ]
+}
+```
+
+**Field notes:**
+
+| **Field** | **Type** | **Description** |
+| --- | --- | --- |
+| `testId` | integer | The numeric id used by the per-test-type `GET .../{testId}` status endpoints |
+| `testKey` | string | UUID key for the test |
+| `runStatus` | string | `IN_PROGRESS`, `COMPLETE`, or `ERROR` |
+| `errorCode` | integer | `0` means no error |
+| `band` | string | `2.4`, `5`, `6`, or `N/A` |
+| `createdAt` | string | ISO-8601, UTC |
+
+Filter on `runStatus` of `IN_PROGRESS` client-side to see only what is still outstanding — the endpoint
+returns recent test metadata regardless of status rather than exclusively in-flight tests.
+
+---
+
+## 6. Developer Tips
 
 - Always capture the `testId` from the POST response — it is the only way to retrieve results.
 - Poll the GET status endpoint at a reasonable interval (e.g., every 5 seconds). Tests do not start immediately if an automated test is running on the sensor.
