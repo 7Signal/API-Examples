@@ -73,6 +73,8 @@ These endpoints require the `type` parameter.
 
 **Available types:** `DOWNLOAD_MOS_SCORE`, `DOWNLOAD_THROUGHPUT`, `GATEWAY_PING_RTT`, `GATEWAY_PING_SUCCESS_RATE`, `PING_RTT`, `PING_SUCCESS_RATE`, `ROAMING`, `SIGNAL_STRENGTH`, `UPLOAD_MOS_SCORE`, `UPLOAD_THROUGHPUT`, `WEB_DOWNLOAD_DURATION`, `WEB_DOWNLOAD_SUCCESS_RATE`, `ADJACENT_CHANNEL_INTERFERENCE`, `CO_CHANNEL_INTERFERENCE`, `RF_PROBLEM`, `CONGESTION`, `COVERAGE`, `SEVEN_MCS`
 
+> **Note:** `RF_PROBLEM` is retained for historical data only. The platform no longer produces new `RF_PROBLEM` values. Recent time ranges return no data for it.
+
 #### `GET /kpis/agents`
 
 Retrieves KPI data for agents.
