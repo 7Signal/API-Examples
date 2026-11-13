@@ -47,7 +47,7 @@ def test_stream_analysis_uses_stream_true():
     mock_post, _ = build_streaming_response()
 
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
-        analysis_stream.stream_analysis("fake-token", "ROAMING", {"agentId": "abc"})
+        analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
 
     assert mock_post.call_args.kwargs["stream"] is True
 
@@ -57,14 +57,35 @@ def test_stream_analysis_uses_stream_true():
 def test_stream_analysis_sends_prompt_type_and_input_data():
     mock_post, _ = build_streaming_response()
 
+    input_data = analysis_stream.build_input_data("WIFI_CONGESTION_ANALYSIS", "abc", 1, 2)
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
-        analysis_stream.stream_analysis(
-            "fake-token", "ROAMING", {"agentId": "abc", "from": "1", "to": "2"}
-        )
+        analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", input_data)
 
     payload = mock_post.call_args.kwargs["json"]
-    assert payload["promptTypeKey"] == "ROAMING"
-    assert payload["inputData"]["agentId"] == "abc"
+    assert payload["promptTypeKey"] == "WIFI_CONGESTION_ANALYSIS"
+    assert payload["inputData"] == input_data
+
+
+# Test that inputData is the agent time-series query the prompt types read
+def test_build_input_data_is_an_agent_time_series_query():
+    input_data = analysis_stream.build_input_data("WIFI_COVERAGE_ANALYSIS", "agent-1", 100, 200)
+
+    assert input_data == {
+        "groupByDimension": "BSSID",
+        "from": 100,
+        "to": 200,
+        "timeBucket": "ONE_MIN",
+        "aggregateFunctions": ["AVG"],
+        "metrics": ["COVERAGE", "SIGNAL_STRENGTH", "BEST_NEIGHBOR_SIGNAL_STRENGTH", "SEVEN_MCS"],
+        "deviceIds": ["agent-1"],
+    }
+
+
+# Test that an unknown prompt type still gets a query, with every known metric
+def test_build_input_data_for_an_unknown_prompt_type():
+    input_data = analysis_stream.build_input_data("SOMETHING_NEW", "agent-1", 100, 200)
+
+    assert set(input_data["metrics"]) == set(analysis_stream.DEFAULT_METRICS)
 
 
 # Test that the data: prefix is stripped and the text is assembled in order
@@ -72,7 +93,7 @@ def test_stream_analysis_strips_data_prefix():
     mock_post, _ = build_streaming_response()
 
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
-        text = analysis_stream.stream_analysis("fake-token", "ROAMING", {"agentId": "abc"})
+        text = analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
 
     assert "# Wi-Fi Network Analysis" in text
     assert "## RECOMMENDATIONS" in text
@@ -85,7 +106,7 @@ def test_stream_analysis_iterates_lines():
     mock_post, mock_response = build_streaming_response()
 
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
-        analysis_stream.stream_analysis("fake-token", "ROAMING", {"agentId": "abc"})
+        analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
 
     mock_response.iter_lines.assert_called_once()
 
@@ -96,7 +117,7 @@ def test_stream_analysis_logs_chunks(caplog):
 
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
         with caplog.at_level("INFO"):
-            analysis_stream.stream_analysis("fake-token", "ROAMING", {"agentId": "abc"})
+            analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
 
     assert "## SUMMARY" in caplog.text
 
@@ -125,7 +146,7 @@ def test_stream_analysis_empty_stream(caplog):
 
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
         with caplog.at_level("INFO"):
-            text = analysis_stream.stream_analysis("fake-token", "ROAMING", {"agentId": "abc"})
+            text = analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
 
     assert text == ""
     assert "No analysis" in caplog.text
@@ -162,7 +183,7 @@ def test_stream_analysis_http_error(caplog):
 
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
         with caplog.at_level("ERROR"):
-            text = analysis_stream.stream_analysis("fake-token", "ROAMING", {})
+            text = analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
 
     assert text == ""
     assert "HTTP error" in caplog.text
@@ -174,27 +195,86 @@ def test_stream_analysis_connection_error(caplog):
 
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
         with caplog.at_level("ERROR"):
-            text = analysis_stream.stream_analysis("fake-token", "ROAMING", {})
+            text = analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
 
     assert text == ""
     assert "Unexpected error" in caplog.text
 
 
-# Test that lines without the data: prefix are ignored
-def test_stream_analysis_ignores_non_data_lines():
-    mock_post, _ = build_streaming_response(lines=[": keep-alive", "event:ping", "data:real"])
+# Test that comments and named events other than progress/error never reach the text
+def test_stream_analysis_ignores_comments_and_unknown_events():
+    mock_post, _ = build_streaming_response(
+        lines=[":keepalive", "", "event:ping", "data:{}", "", "data:real"]
+    )
 
     with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
-        text = analysis_stream.stream_analysis("fake-token", "ROAMING", {})
+        text = analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
 
     assert text == "real"
 
 
+# Test that a frame's data lines are joined with newlines and frames are joined
+# with nothing, since each frame is one chunk of the answer
+def test_stream_analysis_assembles_frames():
+    mock_post, _ = build_streaming_response(
+        lines=["data:# Title", "data:", "data:Wi-", "", "data:Fi is fine", ""]
+    )
+
+    with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
+        text = analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
+
+    assert text == "# Title\n\nWi-Fi is fine"
+
+
+# Test that the progress event is logged as a status, not added to the text
+def test_stream_analysis_progress_event_is_not_text(caplog):
+    mock_post, _ = build_streaming_response(
+        lines=["event:progress", 'data:{"stage":"generating"}', "", "data:answer", ""]
+    )
+
+    with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
+        with caplog.at_level("INFO"):
+            text = analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
+
+    assert text == "answer"
+    assert "generating" in caplog.text
+    assert "stage" not in caplog.text
+
+
+# Test that an error event raises with the partial text, so an incomplete
+# analysis is never returned as if it were complete
+def test_stream_analysis_error_event_raises_with_partial_text():
+    mock_post, _ = build_streaming_response(
+        lines=["data:partial", "", "event:error", 'data:{"reason":"timeout"}', ""]
+    )
+
+    with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
+        with pytest.raises(analysis_stream.StreamEndedEarly) as ended_early:
+            analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
+
+    assert ended_early.value.reason == "timeout"
+    assert ended_early.value.partial_text == "partial"
+
+
+# Test that any reason other than timeout, or an unreadable one, is reported as failed
+@pytest.mark.parametrize("data", ['{"reason":"failed"}', '{"reason":"other"}', "not json", "[]"])
+def test_stream_analysis_error_event_reason_defaults_to_failed(data):
+    mock_post, _ = build_streaming_response(lines=["event:error", f"data:{data}", ""])
+
+    with patch("examples.eyeris.analysis_stream.requests.post", mock_post):
+        with pytest.raises(analysis_stream.StreamEndedEarly) as ended_early:
+            analysis_stream.stream_analysis("fake-token", "WIFI_CONGESTION_ANALYSIS", {})
+
+    assert ended_early.value.reason == "failed"
+    assert ended_early.value.partial_text == ""
+
+
 def run_main(input_values):
+    stream = MagicMock(return_value="text")
     applied = [
         patch("examples.eyeris.analysis_stream.get_token", return_value=("tok", 0)),
         patch("builtins.input", side_effect=input_values),
-        patch("examples.eyeris.analysis_stream.stream_analysis", return_value="text"),
+        patch("examples.eyeris.analysis_stream.stream_analysis", stream),
     ]
     for p in applied:
         p.start()
@@ -203,14 +283,42 @@ def run_main(input_values):
     finally:
         for p in reversed(applied):
             p.stop()
+    return stream
 
 
-# Test main's happy path
+# Test main's happy path, including the agent and window it sends
 def test_main_happy_path(caplog):
     with caplog.at_level("INFO"):
-        run_main(["3fa85f64-5717-4562-b3fc-2c963f66afa6", "ROAMING", "", ""])
+        stream = run_main(["3fa85f64-5717-4562-b3fc-2c963f66afa6", "WIFI_CONGESTION_ANALYSIS", "100", "200"])
 
     assert "streaming" in caplog.text
+    input_data = stream.call_args.args[2]
+    assert input_data["deviceIds"] == ["3fa85f64-5717-4562-b3fc-2c963f66afa6"]
+    assert (input_data["from"], input_data["to"]) == (100, 200)
+
+
+# Test that main exits with an error when the analysis stops early
+def test_main_stream_ended_early_exits(caplog):
+    applied = [
+        patch("examples.eyeris.analysis_stream.get_token", return_value=("tok", 0)),
+        patch("builtins.input", side_effect=["agent", "WIFI_CONGESTION_ANALYSIS", "", ""]),
+        patch(
+            "examples.eyeris.analysis_stream.stream_analysis",
+            side_effect=analysis_stream.StreamEndedEarly("timeout", "partial"),
+        ),
+    ]
+    for p in applied:
+        p.start()
+    try:
+        with caplog.at_level("ERROR"):
+            with pytest.raises(SystemExit) as exit_info:
+                analysis_stream.main()
+    finally:
+        for p in reversed(applied):
+            p.stop()
+
+    assert exit_info.value.code == 1
+    assert "incomplete" in caplog.text
 
 
 # Test that an empty agent id exits
@@ -237,10 +345,10 @@ def test_main_empty_prompt_type_exits():
 # Test that non-numeric times exit
 def test_main_bad_times_exit():
     with pytest.raises(SystemExit):
-        run_main(["agent", "ROAMING", "abc", "def"])
+        run_main(["agent", "WIFI_CONGESTION_ANALYSIS", "abc", "def"])
 
 
 # Test that a start time at or after the end time exits
 def test_main_inverted_window_exits():
     with pytest.raises(SystemExit):
-        run_main(["agent", "ROAMING", "200", "100"])
+        run_main(["agent", "WIFI_CONGESTION_ANALYSIS", "200", "100"])
