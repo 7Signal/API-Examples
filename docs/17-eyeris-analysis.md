@@ -20,7 +20,7 @@ There are two ways to consume it, and they are genuinely different endpoints rat
 | Best for | Scripts, batch jobs, anything that can wait | Interactive UIs showing text as it generates |
 
 Analysis takes a few seconds to generate. `POST` returns as soon as the analysis has started, with the
-identifiers you need to fetch it; `GET` then waits until the analysis is ready, for up to about 30 seconds,
+identifiers you need to fetch it; `GET` then waits until the analysis is ready, for up to about 25 seconds,
 so the first `GET` usually returns it.
 
 ## 2. Endpoints
@@ -88,7 +88,7 @@ times inside it are ISO-8601 in UTC, for example `2026-02-21T13:00:00Z`. Some wi
   as `No roaming data was reported for this client between 2026-02-21T01:00:00Z and
   2026-02-21T03:00:00Z, so there is nothing to analyse for this period.`
 
-The call waits until the analysis is ready, for up to about 30 seconds. If it ends without a result:
+The call waits until the analysis is ready, for up to about 25 seconds. If it ends without a result:
 
 | Status | `message` | Meaning |
 |---|---|---|
@@ -252,7 +252,7 @@ with requests.post(url, headers=headers, json=payload, stream=True) as response:
 
 **Q: `GET /eyeris/agents/client-analysis/{requestId}` returns `500` with "Eyeris analysis timed out".**
 
-A: The analysis was still generating when the call stopped waiting, after about 30 seconds. Call `GET`
+A: The analysis was still generating when the call stopped waiting, after about 25 seconds. Call `GET`
 again with the same identifiers. If the message is "Eyeris analysis failed" instead, the analysis won't
 finish: start a new one with `POST`.
 

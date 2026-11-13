@@ -6,7 +6,7 @@
 #
 # Eyeris returns a plain-language explanation of an agent's Wi-Fi experience rather
 # than raw metrics. Analysis takes a few seconds to generate, so the API accepts the
-# request immediately; fetching the result then waits, for up to about 30 seconds,
+# request immediately; fetching the result then waits, for up to about 25 seconds,
 # until the analysis is ready.
 #
 # For an interactive alternative that shows text as it is generated, see
@@ -37,7 +37,7 @@ API_HOST = os.getenv("API_HOST", "api-v2.7signal.com")
 # specification, so analysis_stream.py warns and sends instead of refusing.
 VALID_ANALYSIS_TYPES = ["ROAMING", "CONGESTION", "COVERAGE", "INTERFERENCE"]
 
-# Each fetch waits on the server for up to about 30 seconds, so a few attempts cover
+# Each fetch waits on the server for up to about 25 seconds, so a few attempts cover
 # even a slow analysis. The pause between attempts only spaces out the requests.
 POLL_INTERVAL_SECONDS = 1
 POLL_RETRIES = 4
@@ -103,7 +103,7 @@ def error_message(response):
 
 def get_analysis(token, request_id, request_queue_id):
     # Fetches an analysis result. The API holds the request open until the analysis
-    # is ready, for up to about 30 seconds. There are three outcomes:
+    # is ready, for up to about 25 seconds. There are three outcomes:
     #   - a result dict   : the analysis is ready
     #   - None            : the API stopped waiting before it was ready (a 500 whose
     #                       message says it timed out), so asking again is worthwhile
