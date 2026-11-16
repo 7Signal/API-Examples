@@ -3,6 +3,8 @@ import sys
 import os
 from unittest.mock import patch, MagicMock
 
+import requests as _requests
+
 # Add the root directory so we can import our modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
@@ -17,11 +19,10 @@ RESPONSE_ID = "e90f5c34-6b28-41d7-8a95-1f3c7d0b2a68"
 SAMPLE_START = {
     "requestId": REQUEST_ID,
     "requestQueueId": QUEUE_ID,
-    "responseId": RESPONSE_ID,
 }
 
 SAMPLE_RESULT = {
-    "response": "# Wi-Fi Network Analysis\n\n## SUMMARY\nThe device roamed cleanly.",
+    "response": "SUMMARY:\nThe device roamed cleanly.\n\nANALYSIS:\n- Duration: no failed minutes.",
     "requestId": REQUEST_ID,
     "responseId": RESPONSE_ID,
 }
@@ -39,7 +40,7 @@ def test_functions_exist():
 @patch("examples.eyeris.client_analysis.requests.post")
 def test_start_analysis_success(mock_post, caplog):
     mock_response = MagicMock()
-    mock_response.status_code = 201
+    mock_response.status_code = 200
     mock_response.json.return_value = SAMPLE_START
     mock_response.raise_for_status = MagicMock()
     mock_post.return_value = mock_response
@@ -55,11 +56,11 @@ def test_start_analysis_success(mock_post, caplog):
     assert started["requestId"] == REQUEST_ID
 
 
-# Test that from/to are sent as JSON strings, which is what the API expects
+# Test that from/to are sent as epoch milliseconds
 @patch("examples.eyeris.client_analysis.requests.post")
-def test_start_analysis_sends_times_as_strings(mock_post):
+def test_start_analysis_sends_epoch_milliseconds(mock_post):
     mock_response = MagicMock()
-    mock_response.status_code = 201
+    mock_response.status_code = 200
     mock_response.json.return_value = SAMPLE_START
     mock_response.raise_for_status = MagicMock()
     mock_post.return_value = mock_response
@@ -69,10 +70,8 @@ def test_start_analysis_sends_times_as_strings(mock_post):
     )
 
     payload = mock_post.call_args.kwargs["json"]
-    assert payload["from"] == "1740106800000"
-    assert payload["to"] == "1740114000000"
-    assert isinstance(payload["from"], str)
-    assert isinstance(payload["to"], str)
+    assert payload["from"] == 1740106800000
+    assert payload["to"] == 1740114000000
 
 
 # Test that a lowercase analysis type is rejected before any request is sent
@@ -98,32 +97,41 @@ def test_get_analysis_passes_queue_id(mock_get):
 
     result = client_analysis.get_analysis("fake-token", REQUEST_ID, QUEUE_ID)
 
-    assert mock_get.call_args.kwargs["params"]["requestQueueId"] == QUEUE_ID
-    assert result["response"].startswith("# Wi-Fi Network Analysis")
+    assert mock_get.call_args.kwargs["params"] == {"requestQueueId": QUEUE_ID}
+    assert result["response"].startswith("SUMMARY:")
 
 
-# Test that an optional responseId is forwarded when supplied
-@patch("examples.eyeris.client_analysis.requests.get")
-def test_get_analysis_includes_response_id_when_given(mock_get):
+def error_response(status, message):
     mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = SAMPLE_RESULT
-    mock_response.raise_for_status = MagicMock()
-    mock_get.return_value = mock_response
-
-    client_analysis.get_analysis("fake-token", REQUEST_ID, QUEUE_ID, response_id=RESPONSE_ID)
-
-    assert mock_get.call_args.kwargs["params"]["responseId"] == RESPONSE_ID
+    mock_response.status_code = status
+    mock_response.text = message
+    mock_response.json.return_value = {"status": status, "message": message}
+    mock_response.raise_for_status.side_effect = _requests.exceptions.HTTPError(str(status))
+    return mock_response
 
 
-# Test that a 404 means "not ready yet" and returns None rather than raising
+# Test that the API giving up waiting means "not ready yet", worth asking again
 @patch("examples.eyeris.client_analysis.requests.get")
-def test_get_analysis_404_returns_none(mock_get):
-    mock_response = MagicMock()
-    mock_response.status_code = 404
-    mock_get.return_value = mock_response
+def test_get_analysis_timeout_returns_none(mock_get):
+    mock_get.return_value = error_response(500, "Eyeris analysis timed out")
 
     assert client_analysis.get_analysis("fake-token", REQUEST_ID, QUEUE_ID) is None
+
+
+# Test that a failed analysis is not retried
+@patch("examples.eyeris.client_analysis.requests.get")
+def test_get_analysis_failed_analysis_returns_failed(mock_get):
+    mock_get.return_value = error_response(500, "Eyeris analysis failed")
+
+    assert client_analysis.get_analysis("fake-token", REQUEST_ID, QUEUE_ID) == client_analysis.ANALYSIS_FAILED
+
+
+# Test that unknown identifiers are a failure, not "not ready yet"
+@patch("examples.eyeris.client_analysis.requests.get")
+def test_get_analysis_404_returns_failed(mock_get):
+    mock_get.return_value = error_response(404, "Request not found")
+
+    assert client_analysis.get_analysis("fake-token", REQUEST_ID, QUEUE_ID) == client_analysis.ANALYSIS_FAILED
 
 
 # Test that polling stops as soon as a result is available
@@ -173,9 +181,6 @@ def test_display_analysis_partial_data(caplog):
 # ---------------------------------------------------------------------------
 # Error handling and main() flows
 # ---------------------------------------------------------------------------
-
-import requests as _requests
-
 
 def http_error_response(text="Bad Request"):
     mock_response = MagicMock()
@@ -302,6 +307,12 @@ def test_main_bad_times_exit():
 def test_main_inverted_window_exits():
     with pytest.raises(SystemExit):
         run_main([AGENT_ID, "ROAMING", "200", "100"])
+
+
+# Test that a window longer than two hours exits before calling the API
+def test_main_window_over_two_hours_exits():
+    with pytest.raises(SystemExit):
+        run_main([AGENT_ID, "ROAMING", "0", str(2 * 60 * 60 * 1000 + 1)])
 
 
 # Test that main stops cleanly when the analysis request is rejected
