@@ -59,6 +59,5 @@ bound to a network returns `409`.
 ## Metrics
 
 Worth knowing: `RF_PROBLEM` remains a valid metric type on the [KPI](10-kpis.md) and
-[Time Series](09-time-series.md) endpoints, but it is retained for historical data only.
-The platform no longer produces new `RF_PROBLEM` values. Recent time ranges return no data
-for it.
+[Time Series](09-time-series.md) endpoints, but it is retired as of January 2027:
+historical data only.
