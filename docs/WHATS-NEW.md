@@ -56,3 +56,8 @@ value is never returned.** Since `PUT` is a full replace, echoing a fetched key 
 writes the mask as the literal secret. Deletes are reference-checked — a key that is still 
 bound to a network returns `409`.
 
+## Metrics
+
+Worth knowing: `RF_PROBLEM` remains a valid metric type on the [KPI](10-kpis.md) and
+[Time Series](09-time-series.md) endpoints, but it is retired as of January 2027:
+historical data only.
